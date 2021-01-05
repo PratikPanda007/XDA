@@ -1,0 +1,2 @@
+Make adjustments for left panel of signup page
+Make adjustments with the login and signup popup

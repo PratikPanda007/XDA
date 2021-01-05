@@ -1,9 +1,98 @@
 <?php
 
-require 'connect/DB.php';
+//require 'connect/DB.php';
+//require 'core/database/connection.php';
+require 'core/load.php';
+//C:/xampp/htdocs/1541012386/XDA/core/load.php
 
- if( isset($_POST['first-name']) && !empty($_POST('first-name'))){
+ if( isset($_POST['first-name']) && !empty($_POST['first-name'])){
+     $upFirst = $_POST['first-name'];
+     $upLast = $_POST['last-name'];
+     $upEmailMobile = $_POST['email-mobile'];
+     $upPassword = $_POST['up-password'];
+     $birthDay = $_POST['birth-day'];
+     $birthMonth = $_POST['birth-month'];
+     $birthYear = $_POST['birth-year'];
+     if(!empty($_POST['gen'])){
+    $upgen = $_POST['gen'];
+    }
+     $birth = ''.$birthYear.'-'.$birthMonth.'-'.$birthDay.'';
      
+     if(empty($upFirst) or empty($upLast) or empty($upEmailMobile) or empty($upgen)){
+         $error = 'All feilds are required';
+     }else{
+         $first_name = $loadFromUser->checkInput($upFirst);
+         $last_name = $loadFromUser->checkInput($upLast);
+         $email_mobile = $loadFromUser->checkInput($upEmailMobile);
+         $password = $loadFromUser->checkInput($upPassword);
+         $screenName = ''.$first_name.'_'.$last_name.'';
+         if(DB::query('SELECT screenName FROM users WHERE screenName = :screenName', array(':screenName' => $screenName ))){
+             //:screenName is acting just like a value in a variable.
+             $screenRand = rand();  //Generates random number
+             
+             $userLink = ''.$screenName.''.$screenRand.'';  
+             //We append screen name and random numbers generated which will maintain the uniqueness of usernames if there are more than one person with same name
+         }else{
+            $userLink = $screenName;
+         }
+         
+         //Now to check for Mobile number or EmailID
+         //For EmailID
+         if(!preg_match("^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9]+(\.[a-z0-9]+)*(\.[a-z0-9]{2,3})$^", $email_mobile)){
+             if(!preg_match("^[0-9]{10}^", $email_mobile)){
+                 $error = "EmailID or Mobile Number is not correct. Please try again!";
+             }else{
+                 $mob = strlen((string)$email_mobile);
+                 
+                 if($mob > 10 || $mob < 10){
+                     $error = 'Mobile number is not valid';
+                 }else if(strlen($password) < 5 && strlen($password) > 60){
+                     $error = "The password is either too short or too long.";
+                     
+                 }else{
+                     if(DB::query('SELECT mobile FROM users WHERE mobile=:mobile', array(':mobile'=>$email_mobile))){
+                         $error = 'Mobile number is already in use.';
+                     }else{
+                         $user_id = $loadFromUser->create('users', array('first_name'=>$first_name,'last_name'=>$last_name, 'mobile'=>$email_mobile, 'password'=>password_hash($password, PASSWORD_BCRYPT), 'screenName'=>$screenName,'userLink'=>$userLink,'birthday'=>$birth, 'gender'=>$upgen));
+                         
+                         $tstrong = true;
+                         $token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
+                        $loadFromUser->create('token', array('token'=>$token, 'user_id'=>$user_id));
+                     
+                        //Set Cookie. FBID is Cookie ID, 60*60*24*7 represents seconds in a min,mins in an hour,hours in a day and days in a week for expiration date. '/' is used for PATH. Next NULL is for DOMAIN, it is optional, next NULL is for security for secured connection. true is important as it will be accessible only through http protocol not by any scripting language.
+                        setcookie('FBID', $token, time()+60*60*24*7, '/', NULL, NULL, true);
+                     
+                        header('location: index.php');
+                     }
+                 }
+             }
+         }else{
+             if(!filter_var($email_mobile)){
+                 //filter_var is used to check email id, we will throw an error about the invalid email format
+                 $error = 'Invalid EmailID Format';
+             }else if(strlen($first_name) > 20 ){
+                 $error = "Name must be between 20 characters.";
+             }else if(strlen($password) < 5 && strlen($password) > 60){
+                 $error = "The password is either too short or too long.";
+             }else{
+                 if((filter_var($email_mobile,FILTER_VALIDATE_EMAIL)) && $loadFromUser->checkEmail($email_mobile) === true){
+                     $error = "Email is already in use";
+                }else{
+                     //Insert data in database using create(tableName, array);
+                     $user_id= $loadFromUser->create('users', array('first_name'=>$first_name,'last_name'=>$last_name, 'email'=>$email_mobile, 'password'=>password_hash($password, PASSWORD_BCRYPT), 'screenName'=>$screenName,'userLink'=>$userLink,'birthday'=>$birth, 'gender'=>$upgen));
+                     
+                     $tstrong = true;
+                     $token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
+                     $loadFromUser->create('token', array('token'=>$token, 'user_id'=>$user_id));
+                     
+                     //Set Cookie. FBID is Cookie ID, 60*60*24*7 represents seconds in a min,mins in an hour,hours in a day and days in a week for expiration date. '/' is used for PATH. Next NULL is for DOMAIN, it is optional, next NULL is for security for secured connection. true is important as it will be accessible only through http protocol not by any scripting language.
+                     setcookie('FBID', $token, time()+60*60*24*7, '/', NULL, NULL, true);
+                     
+                     header('location: index.php');
+                 }
+             }
+         }
+     }
  }
 
 
@@ -19,6 +108,10 @@ require 'connect/DB.php';
 
     <!--CSS-->
     <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+
 
     <script src="./assets/js/jquery.js"></script>
 
@@ -27,17 +120,22 @@ require 'connect/DB.php';
 <body>
     <div class="header">
         <!--This div is for Login-->
+        <h1>Hello World!</h1>
     </div>
     <div class="main">
         <!--This div is for Signup-->
         <div class="left-side">
-            <img src="./assets/image/fb_signup.png" alt="XDA">
+            <!--            <img src="./assets/image/fb_signup.png" alt="XDA">-->
+            <h1 class="xda" style="font-size: 100px;font-family: 'Audiowide', cursive; color: #1877f2;">xda</h1><br>
+            <div class="small">The group for Everyone</div>
         </div>
         <div class="right-side">
-            <div class="error"></div>
-            <h1>Create an account</h1>
-            <div class="small">Its free and always will be</div>
-            <form action="signup.php" method="POST" name="user-sign-up">
+            <div class="error">
+                <?php if(!empty($error)){ echo $error; } ?>
+            </div>
+            <h1>Sign Up</h1>
+            <div class="small">It's quick and easy</div>
+            <form action="signup.php" method="POST" name="user-sign-up" id="signup-form">
                 <div class="sign-up-form">
                     <div class="sign-up-name">
                         <input type="text" name="first-name" id="first-name" class="text-field" placeholder="First Name">
@@ -52,9 +150,9 @@ require 'connect/DB.php';
                     <div class="sig-up-birthday">
                         <div class="bday">Birthday</div>
                         <div class="form-birthday">
-                            <select name="bith-day" id="days" class="select-body"></select>
-                            <select name="bith-month" id="months" class="select-body"></select>
-                            <select name="bith-year" id="years" class="select-body"></select>
+                            <select name="birth-day" id="days" class="select-body"></select>
+                            <select name="birth-month" id="months" class="select-body"></select>
+                            <select name="birth-year" id="years" class="select-body"></select>
                         </div>
                     </div>
                     <div class="gender-wrap">
@@ -63,6 +161,7 @@ require 'connect/DB.php';
                         <input type="radio" name="gen" id="mal" class="m0" value="Male">
                         <label for="mal" class="gener">Male</label>
                     </div>
+                    <hr />
                     <div class="term">
                         By clicking Sign-up, you agree to our Data Policy and Cookie Policy. You may receive SMS notifications from us and can opt out at any time.
                     </div>
