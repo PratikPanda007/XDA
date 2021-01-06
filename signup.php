@@ -57,7 +57,7 @@ require 'core/load.php';
                          
                          $tstrong = true;
                          $token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
-                        $loadFromUser->create('token', array('token'=>$token, 'user_id'=>$user_id));
+                         $loadFromUser->create('token', array('token'=>$token, 'user_id'=>$user_id));
                      
                         //Set Cookie. FBID is Cookie ID, 60*60*24*7 represents seconds in a min,mins in an hour,hours in a day and days in a week for expiration date. '/' is used for PATH. Next NULL is for DOMAIN, it is optional, next NULL is for security for secured connection. true is important as it will be accessible only through http protocol not by any scripting language.
                         setcookie('FBID', $token, time()+60*60*24*7, '/', NULL, NULL, true);
@@ -96,14 +96,67 @@ require 'core/load.php';
  }
 
 
+//Login Procedure
+if(isset($_POST['in-email-mobile']) && !empty($_POST['in-email-mobile'])){
+    $email_mobile = $_POST['in-email-mobile'];
+    $in_pass = $_POST['in-pass'];
 
+    if(!preg_match("^[_a-z0-9-]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$^", $email_mobile)){
+        if(!preg_match("^[0-9]{10}^", $email_mobile)){
+            $error = 'Email or Phone is not correct. Please try again';
+        }else{
+
+        if(DB::query("SELECT mobile FROM users WHERE mobile = :mobile", array(':mobile'=>$email_mobile))){
+            if(password_verify($in_pass, DB::query('SELECT password FROM users WHERE mobile=:mobile', array(':mobile'=>$email_mobile))[0]['password'])){
+
+                $user_id=DB::query('SELECT user_id FROM users WHERE mobile=:mobile', array(':mobile'=>$email_mobile))[0]['user_id'];
+               $tstrong = true;
+$token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
+          $loadFromUser->create('token', array('token'=>sha1($token), 'user_id'=>$user_id));
+
+          setcookie('FBID', $token, time()+60*60*24*7, '/', NULL, NULL, true);
+
+          header('Location: index.php');
+            }else{
+                $error="Password is not correct";
+            }
+
+        }else{
+            $error="User hasn't found.";
+        }
+
+        }
+    }else{
+        if(DB::query("SELECT email FROM users WHERE email = :email", array(':email'=>$email_mobile))){
+            if(password_verify($in_pass, DB::query('SELECT password FROM users WHERE email=:email', array(':email'=>$email_mobile))[0]['password'])){
+
+                $user_id=DB::query('SELECT user_id FROM users WHERE email=:email', array(':email'=>$email_mobile))[0]['user_id'];
+               $tstrong = true;
+$token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
+          $loadFromUser->create('token', array('token'=>sha1($token), 'user_id'=>$user_id));
+
+          setcookie('FBID', $token, time()+60*60*24*7, '/', NULL, NULL, true);
+
+          header('Location: index.php');
+            }else{
+                $error="Password is not correct";
+            }
+
+        }else{
+            $error="User hasn't found.";
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+
+    <!--Meta-->
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XDA</title>
 
     <!--CSS-->
@@ -119,8 +172,7 @@ require 'core/load.php';
 
 <body>
     <div class="header">
-        <!--This div is for Login-->
-        <h1>Hello World!</h1>
+
     </div>
     <div class="main">
         <!--This div is for Signup-->
@@ -130,13 +182,45 @@ require 'core/load.php';
             <div class="small">The group for Everyone</div>
         </div>
         <div class="right-side">
-            <div class="error">
-                <?php if(!empty($error)){ echo $error; } ?>
-            </div>
+            <!--This div is for Login-->
+            <!--            <div class="logo">XDA</div>-->
+            <form action="signup.php" method="POST" id="signin-form">
+                <!--                <h1>Login</h1>-->
+                <div class="mobile-input">
+                    <!--                    <div class="input-text">Email or Phone</div>-->
+                    <input type="text" name="in-email-mobile" id="email-mobile" class="input-text sitext-field" placeholder="Email or Phone Number">
+                </div>
+                <div class="password-input">
+                    <!--                    <div>Password</div>-->
+                    <input type="password" name="in-pass" id="in-password" class="input-text-field sitext-field" placeholder="Password">
+                </div>
+                <div class="login-button">
+                    <input type="submit" value="Log in" class="sign-in login">
+                </div>
+                <div class="forgotten-acc"><a href="#" class="forgotten" id="forgotten">Forgotten Password?</a></div>
+                <br />
+                <hr />
+                <div class="login-button">
+                    <button type="submit" id="myBtn" class="sign-up-button">
+                        Create New Account
+                    </button>
+                </div>
+            </form>
+
+            <!--
             <h1>Sign Up</h1>
             <div class="small">It's quick and easy</div>
+-->
+            <div class="whole-block" id="whole-block">&nbsp;</div>
             <form action="signup.php" method="POST" name="user-sign-up" id="signup-form">
+                <div class="error">
+                    <?php if(!empty($error)){ echo $error; } ?>
+                </div>
+                <span class="closePop" id="closePop">&times;</span>
                 <div class="sign-up-form">
+                    <h1>Sign Up</h1>
+                    <span>It's quick and easy</span>
+                    <hr />
                     <div class="sign-up-name">
                         <input type="text" name="first-name" id="first-name" class="text-field" placeholder="First Name">
                         <input type="text" name="last-name" id="last-name" class="text-field" placeholder="Last Name">
@@ -206,6 +290,26 @@ require 'core/load.php';
         }
 
     </script>
+    <script>
+        $("#myBtn").click(function() {
+            $("#signup-form").css({
+                "display": "inline-block"
+            });
+        });
+        $("#closePop").click(function() {
+            $("#signup-form").css({
+                "display": "none"
+            });
+            $("#whole-block").css({
+                "display": "none"
+            });
+        });
+
+    </script>
+    <script src="./assets/js/try.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 </body>
 
 </html>
