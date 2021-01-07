@@ -10,6 +10,19 @@ body {
     overflow: hidden;
 }
 
+a {
+    text-decoration: none;
+}
+
+li {
+    list-style: none;
+}
+
+textarea:focus,
+input:focus {
+    outline: none;
+}
+
 .main {
     font-family: Helvetica, Arial, sans-serif;
     height: 100vh;
@@ -290,6 +303,140 @@ input.sign-in:hover {
     text-decoration: underline;
 }
 
+/*Profile Section Starts here*/
+
+/************************Top Bar************************/
+
+.top-bar {
+    background-color: #000000;
+    height: 42px;
+    width: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.top-left-part {
+    flex-basis: 40%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: 66px;
+}
+
+.profile-logo img {
+    width: 23px;
+    height: 23px;
+    margin-right: 5px;
+}
+
+.profile-logo {
+    display: flex;
+}
+
+.search-wrap {
+    width: 60%;
+    display: flex;
+}
+
+.s-icon {
+    background-color: white;
+    height: 24px;
+    margin: 1px 1px 1px -2px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.top-icon img {
+    height: 20px;
+    width: 20px;
+}
+
+.top-css {
+    font-family: robot, Arial, sans-serif;
+    font-size: 12px;
+    color: white;
+    padding: 0 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+input#main-search {
+    height: 22px;
+    border-radius: 3px;
+    box-shadow: none;
+    border: 0.5px solid gray;
+    width: 100%;
+}
+
+.top-right-part {
+    flex-basis: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.top-pic img {
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+}
+
+.top-pic-name {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*    background-color: aliceblue;*/
+}
+
+/*
+.hov:hover {
+    background-color: #272a2f !important;
+
+    width: 5%;
+    height: 45px;
+
+}
+*/
+
+/*
+.border-left {
+    border-left: 0.5px solid rgba(255, 255, 255, 1);
+    height: 20px;
+}
+*/
+
+.request-svg:hover .cls-1 {
+    fill: white;
+    stroke: red;
+}
+
+.message-svg:hover .cls-1 {
+    fill: white;
+    stroke: red;
+}
+
+.notification-svg:hover .cls-1 {
+    fill: white;
+    stroke: red;
+}
+
+.help-svg:hover .cls-1 {
+    fill: white;
+    stroke: red;
+}
+
+.more-svg:hover .cls-1 {
+    fill: white;
+    stroke: red;
+}
+
+.dont-add-cover-photo {
+    padding-bottom: 40px;
+}
 
 @media only screen and (max-width: 760px) {
     body {
