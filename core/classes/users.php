@@ -53,6 +53,38 @@ class User{
 
     }
     
+    public function userData($profileId){
+       $stmt = $this->pdo->prepare("SELECT * FROM users LEFT JOIN profile ON users.user_id = profile.userId WHERE users.user_id = :user_id");
+        $stmt->bindParam(':user_id', $profileId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+    
+        public function update($table, $user_id, $fields = array()){
+        $columns = '';
+        $i = 1;
+
+        foreach($fields as $name => $value){
+            $columns .= "{$name} = :{$name}";
+//            coverPic = :coverPic, profilePic = :profilePic,
+            if($i < count($fields)){
+                $columns .= ', ';       
+            }
+            $i++;
+
+
+        }
+         $sql = "UPDATE {$table} SET {$columns} WHERE userId = {$user_id}";
+//        UPDATE profile SET coverPic = :coverPic, profilePic = :profilePic WHERE userId = 10;
+        if($stmt = $this->pdo->prepare($sql)){
+            foreach($fields as $key => $value){
+                $stmt->bindValue(':'.$key, $value);
+            }
+        }
+        $stmt->execute();
+
+    }
+    
 }
 
 ?>

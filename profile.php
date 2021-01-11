@@ -14,19 +14,23 @@ if(login::isLoggedIn()){
     if(isset($_GET['username']) == true && empty($_GET['username']) === false){
         $username = $loadFromUser->checkInput($_GET['username']);
         $profileId = $loadFromUser->userIdByUsername($username);
-    }else{
-        $profileId = $userid;
-    }
         $profileData = $loadFromUser->userData($profileId);
         $userData = $loadFromUser->userData($userid);
-        $requestCheck =$loadFromPost->requestCheck($userid, $profileId);
-        $requestConf = $loadFromPost->requestConf($profileId, $userid);
-        $followCheck= $loadFromPost->followCheck($profileId, $userid);
+    }else{
+ $profileId = $userid;
+ }
 
-        $notification = $loadFromPost->notification($userid);
-        $notificationCount = $loadFromPost->notificationCount($userid);
-        $requestNotificationCount = $loadFromPost->requestNotificationCount($userid);
-      $messageNotification = $loadFromPost->messageNotificationCount($userid);
+
+$profileData = $loadFromUser->userData($profileId);
+$userData = $loadFromUser->userData($userid);
+// $requestCheck =$loadFromPost->requestCheck($userid, $profileId);
+// $requestConf = $loadFromPost->requestConf($profileId, $userid);
+// $followCheck= $loadFromPost->followCheck($profileId, $userid);
+//
+// $notification = $loadFromPost->notification($userid);
+// $notificationCount = $loadFromPost->notificationCount($userid);
+// $requestNotificationCount = $loadFromPost->requestNotificationCount($userid);
+// $messageNotification = $loadFromPost->messageNotificationCount($userid);
 ?>
 
 
@@ -60,10 +64,10 @@ if(login::isLoggedIn()){
             </div>
             <div class="top-right-part">
                 <div class="top-pic-name-wrap  hov">
-                    <a href="profile.php?username=pratik_panda" class="top-pic-name">
-                        <div class="top-pic"><img src="./assets/image/me.jpg" alt=""></div>
-                        <span class="top-name top-css">
-                            Pratik
+                    <a href="profile.php?username=<?php echo $userData->userLink; ?>" class="top-pic-name ">
+                        <div class="top-pic"><img src="<?php echo $userData->profilePic; ?>" alt=""></div>
+                        <span class="top-name top-css border-left ">
+                            <?php echo $userData->firstName; ?>
                         </span>
                     </a>
                 </div>
@@ -191,7 +195,28 @@ if(login::isLoggedIn()){
     <main>
         <div class="main-area">
             <div class="profile-left-wrap">
-                <div class="profile-cover-wrap"></div>
+                <div class="profile-cover-wrap" style="background-image: url(<?php echo $profileData->coverPic; ?>);">
+                    <div class="upload-cov-opt-wrap">
+                        <?php if($profileId == $userid){ ?>
+                        <div class="add-cover-photo">
+                            <img src="./assets/image/profile/uploadCoverPhoto.JPG" alt="coverpic">
+                            <div class="add-cover-tex">Add a cover Photo</div>
+                        </div>
+                        <?php }else{ ?>
+                        <div class="dont-add-cover-pic">
+
+                        </div>
+                        <?php } ?>
+                        <div class="add-cover-opt">
+                            <div class="select-cover-photo">Select Photo</div>
+                            <div class="file-upload">
+                                <label for="cover-upload" class="file-upload-label">Upload Photo</label>
+                                <input type="file" name="file-upload" id="cover-upload" class="file-upload-input">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
                 <div class="profile-bottom-part"></div>
                 <div class="bio-timeline">
                     <div class="bio-wrap"></div>
@@ -203,6 +228,54 @@ if(login::isLoggedIn()){
         <div class="top-box-show"></div>
         <div class="adv_dem"></div>
     </main>
+    <script src="./assets/js/jquery.js"></script>
+    <script>
+        $(function() {
+            $('.add-cover-photo').on('click', function() {
+                $('.add-cover-opt').toggle();
+            })
+
+            $('#cover-upload').on('change', function() {
+                //                alert('Cover Photo Saved');
+
+                var name = $('#cover-upload').val().split('\\').pop();
+                var file_data = $('#cover-upload').prop('files')[0];
+                var file_size = file_data["size"];
+                var file_type = file_data['type'].split('/').pop();
+
+                var userid = '<?php echo $userid; ?>'
+                var imgName = 'user/' + userid + '/coverphoto/' + name + '';
+
+                var form_data = new FormData();
+                form_data.append('file', file_data);
+
+                if (name != '') {
+                    $.post('http://localhost/1541012386/XDA/core/ajax/profile.php', {
+                        imgName: imgName,
+                        userid: userid
+                    }, function(data) {
+                        alert(data);
+
+                    })
+                }
+
+
+            })
+
+            $(document).mouseup(function(e) {
+                var container = new Array();
+
+                container.push($('.add-cover-opt'));
+
+                $.each(container, function(key, value) {
+                    if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
+                        $(value).hide();
+                    }
+                })
+            })
+        })
+
+    </script>
 </body>
 
 </html>

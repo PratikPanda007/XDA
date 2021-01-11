@@ -313,7 +313,7 @@ $token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
 
 
-    <script src="./assets/js/jquery.js"></script>
+    <!--    <script src="./assets/js/jquery.js"></script>-->
 
 </head>
 
@@ -358,50 +358,53 @@ $token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
             <h1>Sign Up</h1>
             <div class="small">It's quick and easy</div>
 -->
-            <div class="whole-block" id="whole-block">&nbsp;</div>
-            <form action="signup.php" method="POST" name="user-sign-up" id="signup-form">
-                <div class="error">
-                    <?php if(!empty($error)){ echo $error; } ?>
-                </div>
-                <span class="closePop" id="closePop">&times;</span>
-                <div class="sign-up-form">
-                    <h1>Sign Up</h1>
-                    <span>It's quick and easy</span>
-                    <hr />
-                    <div class="sign-up-name">
-                        <input type="text" name="first-name" id="first-name" class="text-field" placeholder="First Name">
-                        <input type="text" name="last-name" id="last-name" class="text-field" placeholder="Last Name">
+            <div class="signup-form-whole">
+                <div class="whole-block" id="whole-block">&nbsp;</div>
+                <form action="signup.php" method="POST" name="user-sign-up" id="signup-form" class="">
+                    <div class="error">
+                        <?php if(!empty($error)){ echo $error; } ?>
                     </div>
-                    <div class="sign-wrap-mobile">
-                        <input type="text" name="email-mobile" id="up-email" class="text-input" placeholder="Mobile Number of Email Address">
-                    </div>
-                    <div class="sign-up-password">
-                        <input type="password" name="up-password" id="up-password" class="text-input" placeholder="Password">
-                    </div>
-                    <div class="sig-up-birthday">
-                        <div class="bday">Birthday</div>
-                        <div class="form-birthday">
-                            <select name="birth-day" id="days" class="select-body"></select>
-                            <select name="birth-month" id="months" class="select-body"></select>
-                            <select name="birth-year" id="years" class="select-body"></select>
+                    <span class="closePop" id="closePop">&times;</span>
+                    <div class="sign-up-form">
+                        <h1>Sign Up</h1>
+                        <span>It's quick and easy</span>
+                        <hr />
+                        <div class="sign-up-name">
+                            <input type="text" name="first-name" id="first-name" class="text-field" placeholder="First Name">
+                            <input type="text" name="last-name" id="last-name" class="text-field" placeholder="Last Name">
                         </div>
+                        <div class="sign-wrap-mobile">
+                            <input type="text" name="email-mobile" id="up-email" class="text-input" placeholder="Mobile Number of Email Address">
+                        </div>
+                        <div class="sign-up-password">
+                            <input type="password" name="up-password" id="up-password" class="text-input" placeholder="Password">
+                        </div>
+                        <div class="sig-up-birthday">
+                            <div class="bday">Birthday</div>
+                            <div class="form-birthday">
+                                <select name="birth-day" id="days" class="select-body"></select>
+                                <select name="birth-month" id="months" class="select-body"></select>
+                                <select name="birth-year" id="years" class="select-body"></select>
+                            </div>
+                        </div>
+                        <div class="gender-wrap">
+                            <input type="radio" name="gen" id="fem" class="m0" value="Female">
+                            <label for="fem" class="gender">Female</label>
+                            <input type="radio" name="gen" id="mal" class="m0" value="Male">
+                            <label for="mal" class="gener">Male</label>
+                        </div>
+                        <hr />
+                        <div class="term">
+                            By clicking Sign-up, you agree to our Data Policy and Cookie Policy. You may receive SMS notifications from us and can opt out at any time.
+                        </div>
+                        <input type="submit" class="sign-up" value="Sign Up">
                     </div>
-                    <div class="gender-wrap">
-                        <input type="radio" name="gen" id="fem" class="m0" value="Female">
-                        <label for="fem" class="gender">Female</label>
-                        <input type="radio" name="gen" id="mal" class="m0" value="Male">
-                        <label for="mal" class="gener">Male</label>
-                    </div>
-                    <hr />
-                    <div class="term">
-                        By clicking Sign-up, you agree to our Data Policy and Cookie Policy. You may receive SMS notifications from us and can opt out at any time.
-                    </div>
-                    <input type="submit" class="sign-up" value="Sign Up">
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
+    <script src="./assets/js/jquery.js"></script>
 
     <script>
         for (i = new Date().getFullYear(); i > 1900; i--) {
@@ -452,10 +455,18 @@ $token = bin2hex(openssl_random_pseudo_bytes(64, $tstrong));
             });
         });
 
+        //        $(function() {
+        //            $('.sign-up-button').on('click', function() {
+        //                $('.signup-form-whole').toggle();
+        //            })
+        //        })
+
     </script>
-    <script src="./assets/js/try.js"></script>
+    <!--    <script src="./assets/js/try.js"></script>-->
+    <!--
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+-->
 
 </body>
 
