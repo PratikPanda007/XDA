@@ -21,8 +21,8 @@ if(login::isLoggedIn()){
  }
 
 
-$profileData = $loadFromUser->userData($profileId);
-$userData = $loadFromUser->userData($userid);
+//$profileData = $loadFromUser->userData($profileId);
+//$userData = $loadFromUser->userData($userid);
 // $requestCheck =$loadFromPost->requestCheck($userid, $profileId);
 // $requestConf = $loadFromPost->requestConf($profileId, $userid);
 // $followCheck= $loadFromPost->followCheck($profileId, $userid);
@@ -216,6 +216,33 @@ $userData = $loadFromUser->userData($userid);
 
                         </div>
                     </div>
+                    <div class="cover-photo-rest-wrap">
+                        <div class="profile-pic-name">
+                            <div class="profile-pic">
+                                <?php if($profileId == $userid){
+                                ?>
+                                <div class="profile-pic-upload">
+                                    <div class="add-pro">
+                                        <img src="./assets/image/profile/uploadCoverPhoto.JPG" alt="">
+                                        <div>Update</div>
+                                    </div>
+                                </div>
+                                <?php    
+                                } ?>
+                                <img src="<?php echo $profileData->profilePic; ?>" alt="DP of <?php $profileData->username; ?>" class="profile-pic-me">
+                            </div>
+                            <!--                            Need to add the verified symbol-->
+                            <div class="profile-name">
+                                <?php echo ''.$profileData->first_name.' '.$profileData->last_name.''; ?>
+                                <!--
+                                <details>
+                                    <summary>Hello</summary>
+                                    <p>Hello World!</p>
+                                </details>
+-->
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="profile-bottom-part"></div>
                 <div class="bio-timeline">
@@ -231,6 +258,47 @@ $userData = $loadFromUser->userData($userid);
     <script src="./assets/js/jquery.js"></script>
     <script>
         $(function() {
+
+            $('.profile-pic-upload').on('click', function() {
+                $('.top-box-show').html('<div class="top-box align-vertical-middle profile-dialoge-show "> <div class="profile-pic-upload-action"> <div class="pro-pic-up "> <div class="file-upload"> <label for="profile-upload" class="file-upload-label"> <snap class="upload-plus-text align-middle"> <snap class="upload-plus-sign">+</snap>Upload Photo</snap> </label> <input type="file" name="file-upload" id="profile-upload" class="file-upload-input"> </div> </div> <div class="pro-pic-choose"></div> </div> </div>')
+            })
+            $(document).on('change', '#profile-upload', function() {
+
+                var name = $('#profile-upload').val().split('\\').pop();
+                var file_data = $('#profile-upload').prop('files')[0];
+                var file_size = file_data['size'];
+                var file_type = file_data['type'].split('/').pop();
+                var userid = u_id;
+                var imgName = 'user/' + userid + '/profilePhoto/' + name + '';
+                var form_data = new FormData();
+                form_data.append('file', file_data);
+
+                if (name != '') {
+                    $.post('http://localhost/facebook/core/ajax/profilePhoto.php', {
+                        imgName: imgName,
+                        userid: userid
+                    }, function(data) {
+                        //                            $('#adv_dem').html(/data);
+                    })
+
+                    $.ajax({
+                        url: 'http://localhost/facebook/core/ajax/profilePhoto.php',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: form_data,
+                        type: 'post',
+                        success: function(data) {
+                            $('.profile-pic-me').attr('src', " " + data + " ");
+                            $('.profile-dialoge-show').hide();
+                        }
+                    })
+
+                }
+
+            })
+
+
             $('.add-cover-photo').on('click', function() {
                 $('.add-cover-opt').toggle();
             })
@@ -259,6 +327,20 @@ $userData = $loadFromUser->userData($userid);
                     })
                 }
 
+                $.ajax({
+                    url: 'http://localhost/1541012386/XDA/core/ajax/profile.php',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: form_data,
+                    type: 'post',
+                    success: function(data) {
+                        $('.profile-cover-wrap').css('background-image', 'url(' + data + ')');
+                        $('.add-cover-opt').hide();
+                    }
+
+                })
+
 
             })
 
@@ -266,6 +348,7 @@ $userData = $loadFromUser->userData($userid);
                 var container = new Array();
 
                 container.push($('.add-cover-opt'));
+                container.push($('.profile-dialoge-show'));
 
                 $.each(container, function(key, value) {
                     if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {

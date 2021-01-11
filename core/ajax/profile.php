@@ -12,13 +12,22 @@ if(isset($_POST['imgName'])){
 
     $loadFromUser->update('profile', $userid, array('coverPic' => $imgName));
 //echo $imgName;
-    echo 'Cover Photo found';
+//    echo 'Cover Photo found';
 
 }else{
-        echo 'Cover Photo not found';
+//        echo 'Cover Photo not found';
 
 }
-//
-// if ( 0 < $_FILES['file']['error'] ) { // echo 'Error: ' . $_FILES['file']['error'] . '<br>' ; // } // else { // $path_directory=$_SERVER['DOCUMENT_ROOT']."/facebook/user/".$userid."/coverphoto/"; // if(!file_exists($path_directory) && !is_dir($path_directory)){ // mkdir($path_directory, 0777, true); // // // } // move_uploaded_file($_FILES['file']['tmp_name'], $path_directory.$_FILES['file']['name']); //} // //echo 'user/' .$userid.'/coverphoto/'.$_FILES['file']['name'];
+if ( 0 < $_FILES['file']['error'] ) { 
+     echo 'Error: ' . $_FILES['file']['error'] . '<br>' ; 
+     } else {
+    $path_directory=$_SERVER['DOCUMENT_ROOT']."/1541012386/XDA/user/".$userid."/coverphoto/"; 
+    if(!file_exists($path_directory) && !is_dir($path_directory)){ mkdir($path_directory, 0777, true);
+    } 
+    
+    move_uploaded_file($_FILES['file']['tmp_name'], $path_directory.$_FILES['file']['name']); 
+}
+
+echo 'user/' .$userid.'/coverphoto/'.$_FILES['file']['name'];
 
 ?>
