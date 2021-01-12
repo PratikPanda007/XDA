@@ -43,6 +43,8 @@ if(login::isLoggedIn()){
 
     <!-- CSS -->
     <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/dist/emojionearea.min.css">
+
 </head>
 
 <body>
@@ -203,7 +205,7 @@ if(login::isLoggedIn()){
                             <div class="add-cover-tex">Add a cover Photo</div>
                         </div>
                         <?php }else{ ?>
-                        <div class="dont-add-cover-pic">
+                        <div class="dont-add-cover-photo">
 
                         </div>
                         <?php } ?>
@@ -229,11 +231,19 @@ if(login::isLoggedIn()){
                                 </div>
                                 <?php    
                                 } ?>
-                                <img src="<?php echo $profileData->profilePic; ?>" alt="DP of <?php $profileData->username; ?>" class="profile-pic-me">
+                                <img src="<?php echo $profileData->profilePic; ?>" alt="" class="profile-pic-me">
                             </div>
                             <!--                            Need to add the verified symbol-->
                             <div class="profile-name">
-                                <?php echo ''.$profileData->first_name.' '.$profileData->last_name.''; ?>
+                                <?php echo ''.$profileData->first_name.' '.$profileData->last_name.''; 
+                                
+                                if($profileData->verified == 1){
+                                        $verified = './assets/image/commentCamera.jpg';
+                                        echo '<img src="./assets/image/verify.png" style="height:20px; width:20px;" title="Only the Admin gets this Badge">';
+                                        // '<img src="./assets/image/commentCamera.jpg">'
+                                    }
+                                
+                                ?>
                                 <!--
                                 <details>
                                     <summary>Hello</summary>
@@ -243,11 +253,152 @@ if(login::isLoggedIn()){
                             </div>
                         </div>
                     </div>
+
+                </div>
+                <div class="cover-bottom-part">
+                    <div class="timeline-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
+                        Timeline
+                    </div>
+                    <div class="about-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
+                        About
+                    </div>
+                    <div class="about-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
+                        Friends
+                    </div>
+                    <div class="about-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
+                        Photos
+                    </div>
                 </div>
                 <div class="profile-bottom-part"></div>
                 <div class="bio-timeline">
-                    <div class="bio-wrap"></div>
-                    <div class="status-timeline-wrap"></div>
+                    <div class="bio-wrap">
+                        <div class="bio-intro">
+                            <div class="intro-wrap">
+                                <img src="./assets/image/profile/intro.JPG" alt="">
+                                <div>Intro</div>
+                            </div>
+                            <div class="intro-icon-text">
+                                <img src="./assets/image/profile/addBio.JPG" alt="">
+                                <div class="add-bio-text">Add a short Bio to tell people more about you.</div>
+                                <div class="add-bio-click"><a href="">Add Bio</a></div>
+                            </div>
+                            <div class="bio-details">
+                                <div class="bio-1">
+                                    <img src="./assets/image/profile/livesIn.JPG" alt="">
+                                    <div class="live-text">Live in <span class="live-text-css blue">Earth</span></div>
+                                </div>
+                                <div class="bio-2">
+                                    <img src="./assets/image/profile/followedBy.JPG" alt="">
+                                    <div class="live-text">Followed by <span class="followed-text-css blue">69 People</span></div>
+                                </div>
+                            </div>
+                            <div class="bio-feature">
+                                <img src="./assets/image/profile/feature.JPG" alt="">
+                                <div class="feat-text">
+                                    Showcase what's important to you by adding people, pages, groups and more to your featured section on your public profile.
+                                </div>
+                                <div class="add-feature blue">Add to featured</div>
+                                <div class="add-feature-link blue">
+                                    <div class="link-plus">+</div>
+                                    <div>Add Instaram, websites or other links.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="status-timeline-wrap">
+                        <?php if($profileId == $userid){?>
+                        <div class="profile-status-write">
+                            <div class="status-wrap">
+                                <div class="status-top-wrap">
+                                    <div class="status-top">
+                                        Create Post
+                                    </div>
+                                </div>
+
+                                <div class="status-med">
+                                    <div class="status-prof">
+                                        <div class="top-pic"><img src="<?php echo $userData->profilePic;  ?>" alt=""></div>
+                                    </div>
+                                    <div class="status-prof-textarea" style="position:relative;">
+                                        <textarea name="textStatus" id="statusEmoji" cols="5" rows="5" class="status align-middle" placeholder="Post a status.."></textarea>
+                                        <ul class="hash-men-holder" style="position:absolute;margin-top: 0;"></ul>
+                                    </div>
+                                </div>
+                                <div class="status-bot">
+                                    <div class="file-upload-remIm input-restore">
+
+                                        <label for="multiple_files" class="file-upload-label">
+                                            <div class="status-bot-1">
+                                                <img src="assets/image/photo.JPG" alt="">
+                                                <div class="status-bot-text">Photo/Video</div>
+                                            </div>
+                                        </label>
+                                        <input type="file" name="post-file-upload" id="multiple_files" class="file-upload-input postImage" data-multiple-caption="{count} files selected" multiple="">
+
+                                    </div>
+                                    <div class="status-bot-1">
+                                        <img src="assets/image/tag.JPG" alt="">
+                                        <div class="status-bot-text">Tag Friends</div>
+                                    </div>
+                                    <div class="status-bot-1">
+                                        <img src="assets/image/activities.JPG" alt="">
+                                        <div class="status-bot-text">Feeling/Activities</div>
+
+                                    </div>
+                                    <div class="status-bot-1 dott">...</div>
+                                </div>
+                                <ul id="sortable" style="position:relative;">
+
+                                </ul>
+                                <div id="error_multiple_files"></div>
+                                <div class="status-share-button-wrap">
+                                    <div class="status-share-button">
+                                        <div class="newsFeed-privacy">
+                                            <div class="newsFeed">
+                                                <div class="right-sign-icon">
+                                                    <img src="assets/image/profile/rightSign.JPG" alt="">
+                                                </div>
+                                                <div class="newsfeed-icon align-middle">
+                                                    <img src="assets/image/profile/newsFeed.JPG" alt="">
+                                                </div>
+                                                <div class="newsfee-text">
+                                                    News Feed
+                                                </div>
+                                            </div>
+                                            <div class="status-privacy-wrap">
+                                                <div class="status-privacy">
+                                                    <div class="privacy-icon align-middle">
+                                                        <img src="assets/image/profile/publicIcon.JPG" alt="">
+                                                    </div>
+                                                    <div class="privacy-text">Public</div>
+                                                    <div class="privacy-downarrow-icon align-middle">
+                                                        <img src="assets/image/watchMore.png" alt="">
+                                                    </div>
+                                                </div>
+                                                <div class="status-privacy-option">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="seemore-sharebutton">
+                                        <div class="share-seemore-option">
+                                            <div class="privacy-downarrow-icon align-middle">
+                                                <img src="assets/image/watchMore.png" alt="">
+                                                <span class="status-seemore">See More</span>
+                                            </div>
+                                        </div>
+                                        <div class="status-share-button align-middle">
+                                            Share
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php }?>
+                    </div>
                 </div>
             </div>
             <div class="profile-right-wrap"></div>
@@ -256,6 +407,7 @@ if(login::isLoggedIn()){
         <div class="adv_dem"></div>
     </main>
     <script src="./assets/js/jquery.js"></script>
+    <script src="./assets/dist/emojionearea.min.js"></script>
     <script>
         $(function() {
 
@@ -268,21 +420,21 @@ if(login::isLoggedIn()){
                 var file_data = $('#profile-upload').prop('files')[0];
                 var file_size = file_data['size'];
                 var file_type = file_data['type'].split('/').pop();
-                var userid = u_id;
+                var userid = '<?php echo $userid; ?>';
                 var imgName = 'user/' + userid + '/profilePhoto/' + name + '';
                 var form_data = new FormData();
                 form_data.append('file', file_data);
 
                 if (name != '') {
-                    $.post('http://localhost/facebook/core/ajax/profilePhoto.php', {
+                    $.post('http://localhost/1541012386/XDA/core/ajax/profilePhoto.php', {
                         imgName: imgName,
                         userid: userid
                     }, function(data) {
-                        //                            $('#adv_dem').html(/data);
+                        //                                        $('#adv_dem').html(/data);
                     })
 
                     $.ajax({
-                        url: 'http://localhost/facebook/core/ajax/profilePhoto.php',
+                        url: 'http://localhost/1541012386/XDA/core/ajax/profilePhoto.php',
                         cache: false,
                         contentType: false,
                         processData: false,
@@ -311,7 +463,7 @@ if(login::isLoggedIn()){
                 var file_size = file_data["size"];
                 var file_type = file_data['type'].split('/').pop();
 
-                var userid = '<?php echo $userid; ?>'
+                var userid = '<?php echo $userid; ?>';
                 var imgName = 'user/' + userid + '/coverphoto/' + name + '';
 
                 var form_data = new FormData();
@@ -323,6 +475,7 @@ if(login::isLoggedIn()){
                         userid: userid
                     }, function(data) {
                         alert(data);
+                        //                        $('#adv_dem').html(data);
 
                     })
                 }
@@ -344,15 +497,41 @@ if(login::isLoggedIn()){
 
             })
 
+            $("#statusEmoji").emojioneArea({
+                pickPosition: "right",
+                spellcheck: true
+            });
+
+            $(document).on('click', '.emojionearea-editor', function() {
+                $('.status-share-button-wrap').show('0.5');
+            })
+
+            $(document).on('click', '.status-bot', function() {
+                $('.status-share-button-wrap').show('0.5');
+            })
+
             $(document).mouseup(function(e) {
                 var container = new Array();
 
                 container.push($('.add-cover-opt'));
                 container.push($('.profile-dialoge-show'));
+                //                container.push($('.profile-status-write'));
 
                 $.each(container, function(key, value) {
                     if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
                         $(value).hide();
+                    }
+                })
+            })
+
+            $(document).mouseup(function(e) {
+                var container = new Array();
+
+                container.push($('.profile-status-write'));
+
+                $.each(container, function(key, value) {
+                    if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
+                        $('.status-share-button-wrap').hide('0.2');
                     }
                 })
             })
