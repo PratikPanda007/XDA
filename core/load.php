@@ -11,6 +11,6 @@ global $pdo;
 $loadFromUser = new User($pdo);
 $loadFromPost = new Post($pdo);
 
-define("BASE_URL", "http://localhost/1541012386/XDA");
+define("BASE_URL", "http://localhost/1541012386/XDA/");
 
 ?>

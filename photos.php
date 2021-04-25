@@ -2,73 +2,56 @@
 
 include 'connect/login.php';
 include 'core/load.php';
-//define("BASE_URL", "http://localhost/1541012386/XDA/");
 
 if(login::isLoggedIn()){
     $userid = login::isLoggedIn();
-//    echo 'Hello';
-    }else{
-        header('location: signup.php');
-//        echo 'World!';
-    }
+}else{
+header('location: sign.php');
+}
 
-    if(isset($_GET['username']) == true && empty($_GET['username']) === false){
-        $username = $loadFromUser->checkInput($_GET['username']);
-        $profileId = $loadFromUser->userIdByUsername($username);
-        $profileData = $loadFromUser->userData($profileId);
-        $userData = $loadFromUser->userData($userid);
-    }else{
- $profileId = $userid;
- }
+if(isset($_GET['username']) == true && empty($_GET['username']) === false){
+    $username = $loadFromUser->checkInput($_GET['username']);
+    $profileId = $loadFromUser->userIdByUsername($username);
+}else{
+    $profileId = $userid;
+}
+    $profileData = $loadFromUser->userData($profileId);
+    $userData = $loadFromUser->userData($userid);
+    $requestCheck =$loadFromPost->requestCheck($userid, $profileId);
+    $requestConf = $loadFromPost->requestConf($profileId, $userid);
+    $followCheck= $loadFromPost->followCheck($profileId, $userid);
+
+    $notification = $loadFromPost->notification($userid);
+    $notificationCount = $loadFromPost->notificationCount($userid);
+    $requestNotificationCount = $loadFromPost->requestNotificationCount($userid);
+  $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 
-$profileData = $loadFromUser->userData($profileId);
-$userData = $loadFromUser->userData($userid);
- $requestCheck =$loadFromPost->requestCheck($userid, $profileId);
- $requestConf = $loadFromPost->requestConf($profileId, $userid);
- $followCheck= $loadFromPost->followCheck($profileId, $userid);
-$notification = $loadFromPost->notification($userid);
-$notificationCount = $loadFromPost->notificationCount($userid);
-$requestNotificationCount = $loadFromPost->requestNotificationCount($userid);
-$messageNotification = $loadFromPost->messageNotificationCount($userid);
+
 ?>
 
-
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 	<meta charset="UTF-8">
-	<title><?php echo ''.$profileData->firstName.' '.$profileData->lastName.''; ?></title>
+	<title>
+		<?php echo ''.$profileData->firstName.' '.$profileData->lastName.''; ?>
+	</title>
+	<link rel="stylesheet" href="assets/css/style.css">
+	<link rel="stylesheet" href="assets/dist/emojionearea.min.css">
 
-	<!-- CSS -->
-	<link rel="stylesheet" href="./assets/css/style.css">
-	<link rel="stylesheet" href="./assets/dist/emojionearea.min.css">
+	<style>
 
+
+	</style>
 </head>
 
 <body>
+	<div class="u_p_id" data-uid="<?php echo $userid ?>" data-pid="<?php echo $profileId ?>"></div>
 	<header>
 		<div class="top-bar">
-			<!--
-			<div class="top-left-part">
-				<div class="profile-logo">
-					<img src="./assets/image/logo.jpg" alt="XDA">
-					<a href="index.php" style="font-size: 30px;font-family: 'Audiowide', cursive; color: #1877f2; margin-right:10px;">xda</a>
-				</div>
-				<div class="search-wrap" style="display: inline;">
-					<input type="text" name="main-search" id="main-search">
-					<div class="s-icon top-icon top-css">
-						<img src="./assets/image/icons8-search-36.png" alt="Search Item">
-					</div>
-				</div>
-				<div id="search-show">
-					<div class="search-result">
-
-					</div>
-				</div>
-			</div>
--->
 			<div class="top-left-part">
 				<div class="profile-logo">
 					<!--				<img src="assets/image/logo.jpg" alt="">-->
@@ -126,7 +109,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 					<div class="request-notification-list-wrap">
 
 						<ul style="margin:0; padding:0;" class="notify-ul">
-							<?php if(empty($requestNotificationCount)){ }else{
+							<?php if(empty($requestNotificationCount)){}else{
                                 foreach($requestNotificationCount as $notify){
 
                                 ?>
@@ -144,7 +127,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 										<div class="notification-type-details">
 											<span style="font-weight:600; font-size:14px; color:#CDDC39;margin-left:5px;">
 												<?php echo ''.$notify->firstName.' '.$notify->lastName.''; ?></span>
-											<?php echo ($notify->type == 'comment') ? 'gave their opinion on your <span>inscribed thought</span>' : (($notify->type == 'postReact')? 'reacted on your <span>inscribed thought</span>' : (($notify->type=='request' && $notify->friendStatus == '1' && $notify->notificationFrom == $userid  ) ? 'accepted your buddy request': (($notify->type=='request'  && $notify->notificationFor == $userid && $notify->notificationCount=='0'  )? 'Sent you a buddy request': 'reacted on your <span>comment</span>'))); ?>
+											<?php echo ($notify->type == 'comment') ? 'commented on your <span>post</span>' : (($notify->type == 'postReact')? 'reacted on your <span>post</span>' : (($notify->type=='request' && $notify->friendStatus == '1' && $notify->notificationFrom == $userid  ) ? 'accepted your friend request': (($notify->type=='request'  && $notify->notificationFor == $userid && $notify->notificationCount=='0'  )? 'Sent you a friend request': 'reacted on your <span>comment</span>'))); ?>
 
 										</div>
 									</a></a>
@@ -208,29 +191,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 						<ul style="margin:0; padding:0;" class="notify-ul">
 							<?php if(empty($notification)){}else{
                                 foreach($notification as $notify){
-                                    if($notify->type == 'request' || $notify->type == 'message'){}else if($notify->type == 'mention'){  ?>
-							<li class="item-notification-wrap <?php echo ($notify->status == '0') ? 'unread-notification': 'read-notification' ?>" data-postid="<?php echo $notify->postid; ?>" data-notificationid="<?php echo $notify->ID; ?>" data-profileid="<?php echo $notify->userId; ?>">
-								<?php if($notify->type == 'request'){ ?>
-								<a href="<?php echo $notify->userLink; ?>" target="_blank" class="item-notification"></a>
-
-								<?php }else if($notify->type == 'message'){
-
-                                }else{ ?>
-								<a href="post.php?username=<?php echo $notify->userLink; ?>&postid=<?php echo $notify->postid; ?>&profileid=<?php echo $notify->userId; ?>" target="_blank" class="item-notification">
-									<?php } ?>
-									<img src="<?php echo $notify->profilePic; ?>" style="height:40px; width:40px; border-radius: 10%; margin-left: 10px; padding-right:20px;" alt="">
-									<div class="notification-type-details">
-										<span style="font-weight:600; font-size:14px; color:#CDDC39;margin-left:5px;">
-											<?php echo ''.$notify->firstName.' '.$notify->lastName.''; ?></span>
-
-										<?php echo 'mentioned you in a <span>post</span>'; ?>
-
-									</div>
-								</a>
-							</li>
-
-
-							<?php          }else{
+                                    if($notify->type == 'request' || $notify->type == 'message'){}else{
                                 ?>
 
 							<li class="item-notification-wrap <?php echo ($notify->status == '0') ? 'unread-notification': 'read-notification' ?>" data-postid="<?php echo $notify->postid; ?>" data-notificationid="<?php echo $notify->ID; ?>" data-profileid="<?php echo $notify->userId; ?>">
@@ -242,14 +203,14 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
                                 }else{ ?>
 									<a href="post.php?username=<?php echo $notify->userLink; ?>&postid=<?php echo $notify->postid; ?>&profileid=<?php echo $notify->userId; ?>" target="_blank" class="item-notification">
 										<?php } ?>
-										<img src="<?php echo $notify->profilePic; ?>" style="height:40px; width:40px; border-radius: 10%; margin-left: 10px; padding-right:20px;" alt="">
+										<img src="<?php echo $notify->profilePic; ?>" style="height:40px; width:40px; border-radius:50%;" alt="">
 										<div class="notification-type-details">
 											<span style="font-weight:600; font-size:14px; color:#CDDC39;margin-left:5px;">
 												<?php echo ''.$notify->firstName.' '.$notify->lastName.''; ?></span>
-											<?php echo ($notify->type == 'comment') ? 'gave their opinion on your <span>inscribed thought</span>' : (($notify->type == 'postReact')? 'reacted on your <span>inscribed thought</span>' : (($notify->type=='request' && $notify->friendStatus == '1' && $notify->notificationFrom == $userid  ) ? 'Buddy request accepted': (($notify->type=='request'  && $notify->notificationFor == $userid && $notify->notificationCount=='0' )? 'Sent you a buddy request': 'reacted on your <span>inscribed thought</span>'))); ?>
+											<?php echo ($notify->type == 'comment') ? 'commented on your <span>post</span>' : (($notify->type == 'postReact')? 'reacted on your <span>post</span>' : (($notify->type=='request' && $notify->friendStatus == '1' && $notify->notificationFrom == $userid  ) ? 'Friend request accepted': (($notify->type=='request'  && $notify->notificationFor == $userid && $notify->notificationCount=='0' )? 'Sent you a friend request': 'reacted on your <span>comment</span>'))); ?>
 
 										</div>
-									</a></a>
+									</a>
 							</li>
 
 							<?php } } }  ?>
@@ -313,7 +274,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 	<main>
 		<div class="main-area">
 			<div class="profile-left-wrap">
-				<div class="profile-cover-wrap" style="background-image: url(<?php echo $profileData->coverPic; ?>);">
+				<div class="profile-cover-wrap" style="background-image: url(<?php echo $profileData->coverPic; ?>)">
 					<div class="upload-cov-opt-wrap">
 						<?php if($profileId == $userid){ ?>
 						<div class="add-cover-photo">
@@ -338,51 +299,29 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 						<div class="profile-pic-name">
 							<div class="profile-pic">
 								<?php if($profileId == $userid){
-                                ?>
+    ?>
 								<div class="profile-pic-upload">
 									<div class="add-pro">
-										<img src="./assets/image/profile/uploadCoverPhoto.JPG" alt="">
+										<img src="assets//image/profile/uploadCoverPhoto.JPG" alt="">
 										<div>Update</div>
 									</div>
 								</div>
-								<?php    
-                                } ?>
+								<?php
+
+} ?>
 								<img src="<?php echo $profileData->profilePic; ?>" alt="" class="profile-pic-me">
 							</div>
-							<!--                            Need to add the verified symbol-->
 							<div class="profile-name">
-								<?php echo ''.$profileData->first_name.' '.$profileData->last_name.''; 
-								if($profileData->verified == 1){
-				echo '<img src="./assets/image/verify.png" style="height:20px; width:20px;" title="Only the Admin gets this Badge">';
-			}else{
-				
-			}
-//                                Badge
-//                                if($profileData->verified == 1){
-//                                        $verified = './assets/image/commentCamera.jpg';
-//                                        echo '<img src="./assets/image/verify.png" style="height:20px; width:20px;" title="Only the Admin gets this Badge">';
-//                                        // '<img src="./assets/image/commentCamera.jpg">'
-//                                    }
-                                
-                                ?>
-								<!--
-                                <details>
-                                    <summary>Hello</summary>
-                                    <p>Hello World!</p>
-                                </details>
--->
+								<?php echo ''.$profileData->first_name.' '.$profileData->last_name.'' ?>
 							</div>
-
 						</div>
 						<div class="profile-action">
 							<?php
                                 if($userid == $profileId){ ?>
-							<a href="about.php">
-								<div class="profile-edit-button" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-									<img src="assets/image/profile/editProfile.JPG" alt="">
-									<div class="edit-profile-button-text" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">Edit Profile</div>
-								</div>
-							</a>
+							<div class="profile-edit-button" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
+								<img src="assets/image/profile//editProfile.JPG" alt="">
+								<div class="edit-profile-button-text" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">Edit Profile</div>
+							</div>
 
 							<?php
                                                     }else{
@@ -391,7 +330,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 							<div class="profile-add-friend" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
 								<img src="assets/image/friendRequestGray.JPG" alt="">
-								<div class="edit-profile-button-text">Add Buddy</div>
+								<div class="edit-profile-button-text">Add Friend</div>
 							</div>
 
 							<?php
@@ -412,9 +351,9 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 							<div class="profile-friend-confirm" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
 								<div class="edit-profile-confirm-button" style="position:relative;">
 									<div class="con-req align-middle">
-										<img src="assets/image/rightsignGray.JPG" alt="">Buddy
+										<img src="assets/image/rightsignGray.JPG" alt="">Friend
 									</div>
-									<div class="request-unfriend" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">Become Stranger?</div>
+									<div class="request-unfriend" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">Unfriend</div>
 								</div>
 							</div>
 
@@ -425,17 +364,17 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 							<div class="profile-friend-sent" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
 								<img src="assets/image/friendRequestGray.JPG" alt="">
-								<div class="edit-profile-button-text">Buddy Request Sent</div>
+								<div class="edit-profile-button-text">Friend Request Sent</div>
 							</div>
 							<?php
                                                 }else if($requestCheck->reqStatus == '1'){ ?>
 							<div class="profile-friend-confirm" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
 								<div class="edit-profile-confirm-button" style="position:relative;">
 									<div class="con-req align-middle">
-										<img src="assets/image/rightsignGray.JPG" alt="">Buddies
+										<img src="assets/image/rightsignGray.JPG" alt="">Friend
 									</div>
 									<div class="request-unfriend" data-userid="<?php  echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-										Strangers
+										Unfriend
 									</div>
 								</div>
 							</div>
@@ -460,238 +399,202 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 							<?php
         }
-                                    ?>
-							<div class="block-wrap">
-								<div class="block-action">
-									<img src="assets/image/profile/dots.JPG" alt="">
-								</div>
-								<div class="block-show" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-									block-user
-								</div>
-							</div>
-
-							<?php
-
 
     }
     ?>
 
-
-
 						</div>
 					</div>
 
+
 				</div>
-				<div class="cover-bottom-part">
-					<div class="timeline-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-						Timeline
-					</div>
-					<a href="about.php">
-						<div class="about-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-							About
-						</div>
-					</a>
-					<a href="friends.php">
-						<div class="about-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-							Friends
-						</div>
-					</a>
-					<a href="photos.php">
-						<div class="about-button align-middle cover-but-css" data-userid="<?php echo $userid; ?>" data-profileid="<?php echo $profileId; ?>">
-							Photos
-						</div>
-					</a>
-				</div>
-				<div class="profile-bottom-part"></div>
+				<?php
+                     include 'include/cover-button.php';
+                    ?>
 				<div class="bio-timeline">
-					<div class="bio-wrap">
-						<div class="bio-intro">
-							<div class="intro-wrap">
-								<img src="./assets/image/profile/intro.JPG" alt="">
-								<div>Intro</div>
-							</div>
-							<div class="intro-icon-text">
-								<img src="./assets/image/profile/addBio.JPG" alt="">
-								<div class="add-bio-text">Add a short Bio to tell people more about you.</div>
-								<div class="add-bio-click"><a href="">Add Bio</a></div>
-							</div>
-							<div class="bio-details">
-								<div class="bio-1">
-									<img src="./assets/image/profile/livesIn.JPG" alt="">
-									<div class="live-text">Live in <span class="live-text-css blue">Earth</span></div>
-								</div>
-								<div class="bio-2">
-									<img src="./assets/image/profile/followedBy.JPG" alt="">
-									<div class="live-text">Followed by <span class="followed-text-css blue">69 People</span></div>
-								</div>
-							</div>
-							<div class="bio-feature">
-								<img src="./assets/image/profile/feature.JPG" alt="">
-								<div class="feat-text">
-									Showcase what's important to you by adding people, pages, groups and more to your featured section on your public profile.
-								</div>
-								<div class="add-feature blue">Add to featured</div>
-								<div class="add-feature-link blue">
-									<div class="link-plus">+</div>
-									<div>Add Instaram, websites or other links.</div>
-								</div>
-							</div>
-						</div>
-
-					</div>
-					<div class="status-timeline-wrap">
-						<?php if($profileId == $userid){?>
-						<div class="profile-status-write">
-							<div class="status-wrap">
-								<div class="status-top-wrap">
-									<div class="status-top">
-										Inscribe something?
-									</div>
-								</div>
-
-								<div class="status-med">
-									<div class="status-prof">
-										<div class="top-pic"><img src="<?php echo $userData->profilePic;  ?>" alt=""></div>
-									</div>
-									<div class="status-prof-textarea" style="position:relative;">
-										<textarea name="textStatus" id="statusEmoji" cols="5" rows="5" class="status align-middle" placeholder="Inscribe your thoughts.."></textarea>
-										<ul class="hash-men-holder" style="position:absolute;margin-top: 0;"></ul>
-									</div>
-								</div>
-								<div class="status-bot">
-									<div class="file-upload-remIm input-restore">
-
-										<label for="multiple_files" class="file-upload-label">
-											<div class="status-bot-1">
-												<img src="assets/image/photo.JPG" alt="">
-												<div class="status-bot-text">Photo/Video</div>
-											</div>
-										</label>
-										<input type="file" name="post-file-upload" id="multiple_files" class="file-upload-input postImage" data-multiple-caption="{count} files selected" multiple="">
-
-									</div>
-									<div class="status-bot-1">
-										<img src="assets/image/tag.JPG" alt="">
-										<div class="status-bot-text">Tag Friends</div>
-									</div>
-									<div class="status-bot-1">
-										<img src="assets/image/activities.JPG" alt="">
-										<div class="status-bot-text">Feeling/Activities</div>
-
-									</div>
-									<div class="status-bot-1 dott">...</div>
-								</div>
-								<ul id="sortable" style="position:relative;">
-
-								</ul>
-								<div id="error_multiple_files"></div>
-								<div class="status-share-button-wrap">
-									<div class="status-share-button">
-										<div class="newsFeed-privacy">
-											<div class="newsFeed">
-												<div class="right-sign-icon">
-													<img src="assets/image/profile/rightSign.JPG" alt="">
-												</div>
-												<div class="newsfeed-icon align-middle">
-													<img src="assets/image/profile/newsFeed.JPG" alt="">
-												</div>
-												<div class="newsfee-text">
-													News Feed
-												</div>
-											</div>
-											<div class="status-privacy-wrap">
-												<div class="status-privacy">
-													<div class="privacy-icon align-middle">
-														<img src="assets/image/profile/publicIcon.JPG" alt="">
-													</div>
-													<div class="privacy-text">Public</div>
-													<div class="privacy-downarrow-icon align-middle">
-														<img src="assets/image/watchMore.png" alt="">
-													</div>
-												</div>
-												<div class="status-privacy-option">
-
-												</div>
-											</div>
+					<div class="about-wrap">
+						<div class="yourPhotoWrap">
+							<div class="friend-request-wrapp">
+								<div class="about-top-wrap" style="display:flex; justify-content: space-between;align-items:center;">
+									<div class="about-header" style="width:100%;">
+										<div class="about-icon">
+											<img src="assets/image/profile/yourPhoto.JPG" alt="">
 										</div>
-
-									</div>
-									<div class="seemore-sharebutton">
-										<div class="share-seemore-option">
-											<div class="privacy-downarrow-icon align-middle">
-												<img src="assets/image/watchMore.png" alt="">
-												<span class="status-seemore">See More</span>
-											</div>
-										</div>
-										<div class="status-share-button align-middle">
-											Share
-										</div>
+										<div class="about-text">Photos</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<?php }?>
-						<div class="ptaf-wrap">
-							<?php $loadFromPost->posts($userid, $profileId, 20); ?>
+							<div class="about-main">
+								<?php $postImage = $loadFromPost->yourPhoto($profileId);
+
+                                    foreach($postImage as $image){
+                                        $yourPhoto = json_decode($image->postImage);
+                                        $imageCount = 0 ;
+                                        for($i = 0; $i < count($yourPhoto); $i++){
+                                            echo '<img src = "'.BASE_URL.$yourPhoto[''.$imageCount++.'']->imageName.'" alt="" data-userid = "'.$userid.'" data-profileid="'.$profileId.'" data-postid="'.$image->post_id.'" data-imageid="'.$imageCount.'" class="postImage" style="height:206px; width:206px; margin:0 10px 10px 0; cursor:pointer;">';
+                                        }
+                                    }
+
+                                    ?>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="profile-right-wrap"></div>
+			<div class="profile-right-wrap "></div>
 		</div>
 		<div class="top-box-show"></div>
-		<div class="adv_dem"></div>
+		<div id="adv_dem "></div>
+
 	</main>
-	<script src="./assets/js/jquery.js"></script>
-	<script src="./assets/dist/emojionearea.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.textcomplete/1.8.5/jquery.textcomplete.min.js" integrity="sha512-7DIA0YtDMlg4BW1e0pXjd96R5zJwK8fJullbvGWbuvkCYgEMkME0UFfeZIGfQGYjSwCSeFRG5MIB5lhhEvKheg==" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.textcomplete/1.8.5/jquery.textcomplete.min.map"></script>
+
+
+
+
+	<script src="assets/js/jquery.js "></script>
+	<script src="assets/dist/emojionearea.min.js"></script>
+	<!--        <script src="assets/js/main.js"></script>-->
 	<script>
 		$(function() {
-			var regex = /[#|@](\w+)$/ig;
 
-			$(document).on('keyup', '.emojionearea-editor', function() {
-				let status_text = $.trim($(this).text());
+			var u_id = $('.u_p_id').data('uid');
+			var p_id = $('.u_p_id').data('pid');
+			var BASE_URL = "http://localhost/1541012386/XDA/";
 
-				let regex_text = status_text.match(regex);
-				console.log(regex_text);
-				if (regex_text != null) {
+			function notificationUpdate(userid) {
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					notificationUpdate: userid
+				}, function(data) {
+					if (data.trim() == '0') {
+						$('.notification-count').empty();
+						$('.notification-count').css({
+							"background-color": "transparent"
+						});
 
-					//                    $('.status-prof-textarea').children("<ul class='status-user-list'></ul>");
+					} else {
+						$('.notification-count').html(data);
+						$('.notification-count').css({
+							"background-color": "red"
+						});
 
-					$.post('http://localhost/1541012386/XDA/core/ajax/hashtag_mention.php', {
-						regex_text_placeholder: regex_text
-					}, function(data) {
-						$('ul.hash-men-holder').html(data);
 
-						$('li.mention-user').click(function() {
-							var mention_userLink = $(this).find('.mention-name').data('userlink');
-							var mention_profileid = $(this).find('.mention-name').data('profileid');
-							var status_old = $('.emojionearea-editor').text();
-							var status_new = status_old.replace(regex, "");
 
-							$('.emojionearea-editor').text('' + status_new + '@' + mention_userLink + '');
-							$('ul.hash-men-holder').empty();
-							$.post('http://localhost/1541012386/XDA/core/ajax/hashtag_mention.php', {
-								mention_userLink: mention_userLink,
-								mention_profileid: mention_profileid
-							}, function(data) {
-								//                        $('adv_dem').html(data);
-								//                        location.reload();
-							})
+						//
+					}
+				})
+			}
 
-						})
-					})
-				} else {
+			function requestNotificationUpdate(userid) {
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					requestNotificationUpdate: userid
+				}, function(data) {
+					if (data.trim() == '0') {
+						$('.request-count').empty();
+						$('.request-count').css({
+							"background-color": "transparent"
+						});
 
-					$('ul.hash-men-holder').empty();
-				}
+					} else {
+						$('.request-count').html(data);
+						$('.request-count').css({
+							"background-color": "red"
+						});
+
+					}
+				})
+			}
+
+			function messageNotificationUpdate(userid) {
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					messageNotificationUpdate: userid
+				}, function(data) {
+					if (data.trim() == '0') {
+						$('.message-count').empty();
+						$('.message-count').css({
+							"background-color": "transparent"
+						});
+
+					} else {
+						$('.message-count').html(data);
+						$('.message-count').css({
+							"background-color": "red"
+						});
+
+					}
+				})
+			}
+
+			$(document).on('click', '.top-notification', function() {
+				$('.notification-list-wrap').toggle();
+				var userid = u_id;
+
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					notify: userid
+				}, function(data) {
+
+				})
+			})
+
+			$(document).on('click', '.request-top-notification', function() {
+				$('.request-notification-list-wrap').toggle();
+				var userid = u_id;
+
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					requestNotify: userid
+				}, function(data) {
+
+				})
+			})
+			$(document).on('click', '.message-top-notification', function() {
+
+				var userid = u_id;
+
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					messageNotify: userid
+				}, function(data) {
+
+				})
 			})
 
 
 
+			var notificationInterval;
+			var userid = u_id;
+			notificationInterval = setInterval(function() {
+				notificationUpdate(userid);
+			}, 1000);
+			var requestNotificationInterval;
+			var userid = u_id;
+			requestNotificationInterval = setInterval(function() {
+				requestNotificationUpdate(userid);
+			}, 1000);
+
+			var messageNotificationInterval;
+			var userid = u_id;
+			messageNotificationInterval = setInterval(function() {
+				messageNotificationUpdate(userid);
+			}, 1000);
+
+
+
+			$(document).on('click', '.unread-notification', function() {
+				$(this).removeClass('unread-notification').addClass('read-notification');
+				var postid = $(this).data('postid');
+				var notificationId = $(this).data('notificationid');
+				var profileid = $(this).data('profileid');
+				var userid = u_id;
+				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
+					statusUpdate: userid,
+					profileid: profileid,
+					postid: postid,
+					notificationId: notificationId
+				}, function(data) {
+
+				})
+			})
+
 			$('.profile-pic-upload').on('click', function() {
-				$('.top-box-show').html('<div class="top-box align-vertical-middle profile-dialoge-show "> <div class="profile-pic-upload-action"> <div class="pro-pic-up "> <div class="file-upload"> <label for="profile-upload" class="file-upload-label"> <snap class="upload-plus-text align-middle"> <snap class="upload-plus-sign">+</snap>Upload Photo</snap> </label> <input type="file" name="file-upload" id="profile-upload" class="file-upload-input"> </div> </div> <div class="pro-pic-choose"></div> </div> </div>')
+				$('.top-box-show').html('<div class="top-box align-vertical-middle profile-dialoge-show "> <div class="profile-pic-upload-action "> <div class="pro-pic-up "> <div class="file-upload "> <label for="profile-upload " class="file-upload-label "> <snap class="upload-plus-text align-middle "> <snap class="upload-plus-sign ">+</snap>Upload Photo</snap> </label> <input type="file" name="file-upload " id="profile-upload " class="file-upload-input "> </div> </div> <div class="pro-pic-choose "></div> </div> </div>')
 			})
 			$(document).on('change', '#profile-upload', function() {
 
@@ -699,7 +602,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var file_data = $('#profile-upload').prop('files')[0];
 				var file_size = file_data['size'];
 				var file_type = file_data['type'].split('/').pop();
-				var userid = '<?php echo $userid; ?>';
+				var userid = u_id;
 				var imgName = 'user/' + userid + '/profilePhoto/' + name + '';
 				var form_data = new FormData();
 				form_data.append('file', file_data);
@@ -709,7 +612,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 						imgName: imgName,
 						userid: userid
 					}, function(data) {
-						//                                        $('#adv_dem').html(/data);
+						//                            $('#adv_dem').html(/data);
 					})
 
 					$.ajax({
@@ -731,21 +634,20 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 
 			$('.add-cover-photo').on('click', function() {
-				$('.add-cover-opt').toggle();
+				$('.add-cov-opt').toggle();
 			})
 
 			$('#cover-upload').on('change', function() {
-				//                alert('Cover Photo Saved');
-
 				var name = $('#cover-upload').val().split('\\').pop();
 				var file_data = $('#cover-upload').prop('files')[0];
-				var file_size = file_data["size"];
+				var file_size = file_data["size "];
 				var file_type = file_data['type'].split('/').pop();
 
-				var userid = '<?php echo $userid; ?>';
+				var userid = u_id;
 				var imgName = 'user/' + userid + '/coverphoto/' + name + '';
 
 				var form_data = new FormData();
+
 				form_data.append('file', file_data);
 
 				if (name != '') {
@@ -753,12 +655,10 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 						imgName: imgName,
 						userid: userid
 					}, function(data) {
-						alert(data);
-						//                        $('#adv_dem').html(data);
+						//                            alert(data);
 
 					})
 				}
-
 				$.ajax({
 					url: 'http://localhost/1541012386/XDA/core/ajax/profile.php',
 					cache: false,
@@ -768,15 +668,13 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 					type: 'post',
 					success: function(data) {
 						$('.profile-cover-wrap').css('background-image', 'url(' + data + ')');
-						$('.add-cover-opt').hide();
+						$('.add-cov-opt').hide();
 					}
 
 				})
+			});
 
-
-			})
-
-			$("#statusEmoji").emojioneArea({
+			$('#statusEmoji').emojioneArea({
 				pickPosition: "right",
 				spellcheck: true
 			});
@@ -784,7 +682,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			$(document).on('click', '.emojionearea-editor', function() {
 				$('.status-share-button-wrap').show('0.5');
 			})
-
 			$(document).on('click', '.status-bot', function() {
 				$('.status-share-button-wrap').show('0.5');
 			})
@@ -794,26 +691,25 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			$(document).on("change", "#multiple_files", function(e) {
 				var count = 0;
 				var files = e.target.files;
-
 				$(this).removeData();
-
 				var text = "";
 
 				$.each(files, function(i, file) {
 					fileCollection.push(file);
 					var reader = new FileReader();
 
-					reader.readAsDataURL(file); //readAsDataURL Read every single file of data
+					reader.readAsDataURL(file);
+
 					reader.onload = function(e) {
 						var name = document.getElementById("multiple_files").files[i].name;
-						var template = '<li class="ui-state-default del" style="position: relative;"><img id="' + name + '" style="width:60px; height:60px;" src="' + e.target.result + '"></li>';
+						var template = '<li class="ui-state-default del" style="position:relative;"><img id="' + name + '" style="width:60px; height:60px" src="' + e.target.result + '"></li>';
 						$("#sortable").append(template);
 					}
 				})
 
-				$("#sortable").append('<div class="remImg" style="position:absolute; top:0;right:0;cursor:pointer; display:flex;justify-content:center; align-items:center; background-color:white; border-radius:50%; height:1rem; width:1rem; font-size: 0.900rem;">&times;</div>')
-			})
+				$("#sortable").append('<div class="remImg" style="position:absolute; top:0;right:0;cursor:pointer; display:flex;justify-content:center; align-items:center; background-color:white; border-radius:50%; height:1rem; width:1rem; font-size: 0.694rem;">X</div>')
 
+			})
 			$(document).on('click', '.remImg', function() {
 				$('#sortable').empty();
 				$('.input-restore').empty().html('<label for="multiple_files" class="file-upload-label"><div class="status-bot-1"><img src="assets/image/photo.JPG" alt=""><div class="status-bot-text">Photo/Video</div></div></label><input type="file" name="file-upload" id="multiple_files" class="file-upload-input" data-multiple-caption="{count} files selected" multiple="">');
@@ -832,16 +728,16 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 				if (files.length != 0) {
 					if (files.length > 10) {
-						error_images += 'Sorry, You can\'t select more than 10 images';
+						error_images += 'You can not select more than 10 images';
 					} else {
 						for (var i = 0; i < files.length; i++) {
 							var name = document.getElementById('multiple_files').files[i].name;
 
-							storeImage += '{\"imageName\":\"user/' + <?php echo $userid ?> + '/postImage/' + name + '\"},';
+							storeImage += '{\"imageName\":\"user/' + u_id + '/postImage/' + name + '\"},';
 
 							var ext = name.split('.').pop().toLowerCase();
 
-							if (jQuery.inArray(ext, ['gif', 'png', 'jpg', 'jpeg', 'mp4']) == -1) {
+							if (jQuery.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
 								error_images += '<p>Invalid ' + i + ' File </p>';
 							}
 
@@ -853,8 +749,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 							var fsize = f.size || f.fileSize;
 
-							if (fsize > 2000000000) {
-								//20 MB
+							if (fsize > 2000000) {
 								error_images += '<p>' + i + ' File Size is very big</p>';
 							} else {
 								formData.append('file[]', document.getElementById('multiple_files').files[i]);
@@ -867,7 +762,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 					} else {
 						var str = storeImage.replace(/,\s*$/, "");
-						//Replace all white space with no space
 
 						var stIm = '[' + str + ']';
 					}
@@ -895,44 +789,23 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				} else {
 					var stIm = '';
 				}
-				//                var mention_user = statusText.match(regex);
-
-
 				if (stIm == '') {
 					$.post('http://localhost/1541012386/XDA/core/ajax/postSubmit.php', {
 						onlyStatusText: statusText
-						//                        mention_user: mention_user
 					}, function(data) {
 						$('adv_dem').html(data);
 						location.reload();
-
 					})
 				} else {
 					$.post('http://localhost/1541012386/XDA/core/ajax/postSubmit.php', {
 						stIm: stIm,
 						statusText: statusText
-						//                        mention_user: mention_user
 
 					}, function(data) {
 						$('#adv_dem').html(data);
-						location.reload();
+						//                            location.reload();
 					})
 				}
-			})
-
-
-			$(document).mouseup(function(e) {
-				var container = new Array();
-
-				container.push($('.add-cover-opt'));
-				container.push($('.profile-dialoge-show'));
-				//                container.push($('.profile-status-write'));
-
-				$.each(container, function(key, value) {
-					if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
-						$(value).hide();
-					}
-				})
 			})
 
 			$(document).on('click', '.postImage', function() {
@@ -940,7 +813,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var postid = $(this).data('postid');
 				var profileid = $(this).data('profileid');
 				var imageSrc = $(this).attr('src');
-				//				alert(imageSrc)
 
 				$.post('http://localhost/1541012386/XDA/core/ajax/imgFetchShow.php', {
 					fetchImgInfo: userid,
@@ -948,7 +820,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 					imageSrc: imageSrc
 				}, function(data) {
 
-					//					alert(data);
 					$('.top-box-show').html(data);
 					commentHover();
 					replyHover();
@@ -962,7 +833,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 							var comment = $(this).val();
 							var postid = $(this).data('postid');
 							var userid = $(this).data('userid');
-							var profileid = "<?php echo $profileId; ?>";
+							var profileid = p_id;
 							var commentPlaceholder = $(this).parents('.nf-5').find('ul.add-comment');
 
 							if (comment == '') {
@@ -1013,16 +884,10 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var userid = $(statusTextContainer).data('userid');
 				var getPostImg = $(this).parents('.nf-1').siblings('.nf-2').find('.nf-2-img');
 				var thiss = $(this).parents('.nf-1').siblings('.nf-2').find('.nf-2-img');
-				//				var profilePic = $(statusTextContainer).data('profiePic');
-				//				var profilePic = 'http://localhost/1541012386/XDA/user/' + userid +
-				//					'/profilePhoto/	 ';
-				var profilePic = '<?php echo $userData->profilePic; ?>';
-
+				var profilePic = $(statusTextContainer).data('profiePic');
 				var getPostText = getPostText1.replace(/\s+/g, " ").trim();
 
-				//				alert(profilePic);
-
-				$('.top-box-show').html('<div class="top-box profile-dialog-show" style="top: 12.5%;left: 22.5%;width: 55%;"> <div class="edit-post-header align-middle " style="justify-content: space-between; padding: 10px; height: 20px; background-color: lightgray;font-size: 14px; font-weight:600; "> <div class="edit-post-text">Edit Post</div> <div class="edit-post-close" style="padding: 5px; color: gray; cursor:pointer; border: 1px solid red;">x</div> </div> <div class="edit-post-value" style="border-bottom: 1px solid lightgray;"> <div class="status-med"> <div class="status-prof"> <div class="top-pic"><img src="' + profilePic + '" alt=""></div> </div> <div class="status-prof-textarea"><textarea data-autoresize rows="5" columns="5" placeholder="" name="textStatus" class="editStatus align-middle" style="font-family:sens-serif; font-weight:400; padding:5px;">' + getPostText + '</textarea></div> </div> </div> <div class="edit-post-submit" style="position: absolute;right:0; bottom: 0; display: flex; align-items: center; margin: 10px;"> <div class="status-privacy-wrap"> <div class="status-privacy "> <div class="privacy-icon align-middle"><img src="assets/image/profile/publicIcon.JPG" alt=""></div> <div class="privacy-text">Public</div> <div class="privacy-downarrow-icon align-middle"><img src="assets/image/watchmore.png" alt=""></div> </div> <div class="status-privacy-option"></div> </div> <div class="edit-post-save" style="padding: 3px 15px; background-color: #4267bc;color: white; font-size: 14px; margin-left:5px; cursor:pointer;" data-postid="' + postid + '" data-userid="' + userid + '" data-tag="' + thiss + '">Save</div> </div> </div>');
+				$('.top-box-show').html('<div class="top-box profile-dialog-show" style="top: 12.5%;left: 22.5%;width: 55%;"> <div class="edit-post-header align-middle " style="justify-content: space-between; padding: 10px; height: 20px; background-color: lightgray;font-size: 14px; font-weight:600; "> <div class="edit-post-text">Edit Post</div> <div class="edit-post-close" style="padding: 5px; color: gray; cursor:pointer;">x</div> </div> <div class="edit-post-value" style="border-bottom: 1px solid lightgray;"> <div class="status-med"> <div class="status-prof"> <div class="top-pic"><img src="' + profilePic + '" alt=""></div> </div> <div class="status-prof-textarea"><textarea data-autoresize rows="5" columns="5" placeholder="" name="textStatus" class="editStatus align-middle" style="font-family:sens-serif; font-weight:400; padding:5px;">' + getPostText + '</textarea></div> </div> </div> <div class="edit-post-submit" style="position: absolute;right:0; bottom: 0; display: flex; align-items: center; margin: 10px;"> <div class="status-privacy-wrap"> <div class="status-privacy "> <div class="privacy-icon align-middle"><img src="assets/images/profile/publicIcon.JPG" alt=""></div> <div class="privacy-text">Public</div> <div class="privacy-downarrow-icon align-middle"><img src="assets/images/watchmore.png" alt=""></div> </div> <div class="status-privacy-option"></div> </div> <div class="edit-post-save" style="padding: 3px 15px; background-color: #4267bc;color: white; font-size: 14px; margin-left:5px; cursor:pointer;" data-postid="' + postid + '" data-userid="' + userid + '" data-tag="' + thiss + '">Save</div> </div> </div>');
 
 
 
@@ -1033,8 +898,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var userid = $(this).data('userid');
 				var editedText = $(this).parents('.edit-post-submit').siblings('.edit-post-value').find('.editStatus');
 				var editedTextVal = $(editedText).val();
-
-				alert(editedTextVal);
 
 				$.post('http://localhost/1541012386/XDA/core/ajax/editPost.php', {
 					editedTextVal: editedTextVal,
@@ -1051,7 +914,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var postid = $(this).data('postid');
 				var userid = $(this).data('userid');
 				var postContainer = $(this).parents('.profile-timeline');
-				var r = confirm("Do you want to erease your inscribed thoughts?");
+				var r = confirm("Do you want to delete the post?");
 
 				if (r == true) {
 					$.post('http://localhost/1541012386/XDA/core/ajax/editPost.php', {
@@ -1060,7 +923,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 					}, function(data) {
 						$(postContainer).empty();
 
-						// alert(data);
+						alert(data);
 
 
 
@@ -1071,6 +934,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 
 			//...........................post option end......................
+
 
 			//...........................Main react......................
 			$(document).on('click', '.like-action', function() {
@@ -1116,7 +980,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			})
 
 			function mainReactSubmit(typeR, postId, userId, nf_3) {
-				var profileid = <?php echo $profileId; ?>;
+				var profileid = p_id;
 				$.post('http://localhost/1541012386/XDA/core/ajax/react.php', {
 					reactType: typeR,
 					postId: postId,
@@ -1128,7 +992,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			}
 
 			function mainReactDelete(typeR, postId, userId, nf_3) {
-				var profileid = <?php echo $profileId; ?>;
+				var profileid = p_id;
 				$.post('http://localhost/1541012386/XDA/core/ajax/react.php', {
 					deleteReactType: typeR,
 					postId: postId,
@@ -1140,9 +1004,8 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			}
 
 			$('.like-action-wrap').hover(function() {
-				var $BASE_URL = 'http://localhost/1541012386/XDA/';
 				var mainReact = $(this).find('.react-bundle-wrap');
-				$(mainReact).html(' <div class="react-bundle align-middle" style="position:absolute;margin-top: -43px; margin-left: -40px; display:flex; background-color:white;padding: 0 2px;border-radius: 25px; box-shadow: 0px 0px 5px black; height:45px; width:270px; justify-content:space-around; transition: 0.3s;"> <div class="like-react-click align-middle"> <img class="main-icon-css" src="' + $BASE_URL + 'assets/image/react/like.png " alt=""></div> <div class="love-react-click align-middle"> <img class="main-icon-css" src="' + $BASE_URL + 'assets/image/react/love.png " alt=""></div> <div class="haha-react-click align-middle"> <img class="main-icon-css" src="' + $BASE_URL + 'assets/image/react/haha.png " alt=""></div> <div class="wow-react-click align-middle"> <img class="main-icon-css" src="' + $BASE_URL + 'assets/image/react/wow.png " alt=""></div> <div class="sad-react-click align-middle"> <img class="main-icon-css" src="' + $BASE_URL + 'assets/image/react/sad.png " alt=""></div> <div class="angry-react-click align-middle"> <img class="main-icon-css" src="' + $BASE_URL + 'assets/image/react/angry.png " alt=""></div> </div>');
+				$(mainReact).html(' <div class="react-bundle align-middle" style="position:absolute;margin-top: -43px; margin-left: -40px; display:flex; background-color:white;padding: 0 2px;border-radius: 25px; box-shadow: 0px 0px 5px black; height:45px; width:270px; justify-content:space-around; transition: 0.3s;"> <div class="like-react-click align-middle"> <img class="main-icon-css" src="' + BASE_URL + 'assets/image/react/like.png " alt=""></div> <div class="love-react-click align-middle"> <img class="main-icon-css" src="' + BASE_URL + 'assets/image/react/love.png " alt=""></div> <div class="haha-react-click align-middle"> <img class="main-icon-css" src="' + BASE_URL + 'assets/image/react/haha.png " alt=""></div> <div class="wow-react-click align-middle"> <img class="main-icon-css" src="' + BASE_URL + 'assets/image/react/wow.png " alt=""></div> <div class="sad-react-click align-middle"> <img class="main-icon-css" src="' + BASE_URL + 'assets/image/react/sad.png " alt=""></div> <div class="angry-react-click align-middle"> <img class="main-icon-css" src="' + BASE_URL + 'assets/image/react/angry.png " alt=""></div> </div>');
 			}, function() {
 				var mainReact = $(this).find('.react-bundle-wrap');
 				$(mainReact).html('');
@@ -1198,7 +1061,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 					mainReactSubmit(typeR, postId, userId, nf_3);
 				} else {
 					$(spanClass).addClass(reactColor);
-					// $(likeActionIcon).attr('src', 'assets/image/react/' + typeR + '.png').addClass('reactIconSize');
+					//                        $(likeActionIcon).attr('src', 'assets/image/react/' + typeR + '.png').addClass('reactIconSize');
 					spanClass.text(typeR);
 					$(likeActionIcon).removeAttr('src').attr('src', 'assets/image/react/' + typeR + '.png').addClass('reactIconSize');
 					mainReactSubmit(typeR, postId, userId, nf_3);
@@ -1207,7 +1070,9 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 			}
 
+
 			//...........................Main react end ......................
+
 
 			//...........................Comment start ......................
 
@@ -1221,7 +1086,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 					var comment = $(this).val();
 					var postid = $(this).data('postid');
 					var userid = $(this).data('userid');
-					var profileid = <?php echo $profileId; ?>;
+					var profileid = p_id;
 					var commentPlaceholder = $(this).parents('.nf-5').find('ul.add-comment');
 
 					if (comment == '') {
@@ -1255,7 +1120,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			function commentHover() {
 
 				$('.com-like-react').hover(function() {
-					var BASE_URL = 'http://localhost/1541012386/XDA/';
 
 					var mainReact = $(this).find('.com-react-bundle-wrap');
 					$(mainReact).html('<div class="react-bundle align-middle" style="position:absolute;margin-top: -45px; margin-left: -40px; display:flex; background-color:white;padding: 0 2px;border-radius: 25px; box-shadow: 0px 0px 5px black; height:45px; width:270px; justify-content:space-around; transition: 0.3s;z-index:2"><div class="com-like-react-click align-middle"><img class="com-main-icon-css" src="' + BASE_URL + 'assets/image/react/like.png " alt=""></div><div class="com-love-react-click align-middle"><img class="com-main-icon-css" src="' + BASE_URL + 'assets/image/react/love.png " alt=""></div><div class="com-haha-react-click align-middle"><img class="com-main-icon-css" src="' + BASE_URL + 'assets/image/react/haha.png " alt=""></div><div class="com-wow-react-click align-middle"><img class="com-main-icon-css" src="' + BASE_URL + 'assets/image/react/wow.png " alt=""></div><div class="com-sad-react-click align-middle"><img class="com-main-icon-css" src="' + BASE_URL + 'assets/image/react/sad.png " alt=""></div><div class="com-angry-react-click align-middle"><img class="com-main-icon-css" src="' + BASE_URL + 'assets/image/react/angry.png " alt=""></div></div>');
@@ -1339,7 +1203,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			})
 
 			function comReactSubmit(typeR, postid, userid, commentID, com_nf_3) {
-				var profileid = "<?php echo $profileId; ?>";
+				var profileid = p_id;
 				$.post('http://localhost/1541012386/XDA/core/ajax/commentReact.php', {
 						commentid: commentID,
 						reactType: typeR,
@@ -1354,7 +1218,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			}
 
 			function comReactDelete(typeR, postid, userid, commentID, com_nf_3) {
-				var profileid = "<?php echo $profileId; ?>";
+				var profileid = p_id;
 				$.post('http://localhost/1541012386/XDA/core/ajax/commentReact.php', {
 						deleteReactType: typeR,
 						delCommentid: commentID,
@@ -1410,9 +1274,9 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var userid = $(this).data('userid');
 				var commentid = $(this).data('commentid');
 				var comContainer = $(this).parents('.new-comment');
-				var profileid = "<?php echo $profileId; ?>";
+				var profileid = p_id;
 
-				var r = confirm('Do you want to erease your opinion');
+				var r = confirm('Do you want to delete the comment?');
 				if (r === true) {
 					$.post('http://localhost/1541012386/XDA/core/ajax/editComment.php', {
 						deletePost: postid,
@@ -1427,6 +1291,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 			//...........................Comment end ......................
 
+
 			//...........................Reply Start ......................
 			$(document).on('click', '.com-reply-action', function() {
 				$('.reply-input').empty();
@@ -1439,7 +1304,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 				var input_field = $(this).parents('.com-text-react-wrap').siblings('.reply-wrap').find('.replyInput');
 
-				input_field.html('<div class="reply-write"><div class="com-pro-pic" style="margin-top: 4px;"><a href="#"><div class="top-pic"><img src="' + profilepic + '" alt=""></div></a></div><div class="com-input" style=""><div class="reply-input" style="flex-basis:96%;"><input type="text" name="" id="" class="reply-input-style reply-submit" style="" data-postid="' + postid + '" data-userid="' + userid + '" data-commentid="' + commentid + '" placeholder="Write your opinion as a reply..."></div></div></div>');
+				input_field.html('<div class="reply-write"><div class="com-pro-pic" style="margin-top: 4px;"><a href="#"><div class="top-pic"><img src="' + profilepic + '" alt=""></div></a></div><div class="com-input" style=""><div class="reply-input" style="flex-basis:96%;"><input type="text" name="" id="" class="reply-input-style reply-submit" style="" data-postid="' + postid + '" data-userid="' + userid + '" data-commentid="' + commentid + '" placeholder="Write a reply..."></div></div></div>');
 
 				replyInput(input_field);
 
@@ -1455,7 +1320,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 				var input_field = $(this).parents('.reply-wrap').find('.replyInput');
 
-				input_field.html('<div class="reply-write"><div class="com-pro-pic" style="margin-top: 4px;"><a href="#"><div class="top-pic"><img src="' + profilepic + '" alt=""></div></a></div><div class="com-input" style=""><div class="reply-input" style="flex-basis:96%;"><input type="text" name="" id="" class="reply-input-style reply-submit" style="" data-postid="' + postid + '" data-userid="' + userid + '" data-commentid="' + commentid + '" placeholder="Write your opinion as a reply..."></div></div></div>');
+				input_field.html('<div class="reply-write"><div class="com-pro-pic" style="margin-top: 4px;"><a href="#"><div class="top-pic"><img src="' + profilepic + '" alt=""></div></a></div><div class="com-input" style=""><div class="reply-input" style="flex-basis:96%;"><input type="text" name="" id="" class="reply-input-style reply-submit" style="" data-postid="' + postid + '" data-userid="' + userid + '" data-commentid="' + commentid + '" placeholder="Write a reply..."></div></div></div>');
 
 				replyInput(input_field);
 
@@ -1471,7 +1336,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 						var postid = $(this).data('postid');
 						var userid = $(this).data('userid');
 						var commentid = $(this).data('commentid');
-						var profileid = <?php echo $profileId; ?>;
+						var profileid = p_id;
 						var replyPlaceholder = $(this).parents('.replyInput').siblings('.reply-text-wrap').find('.old-reply');
 						if (comment == '') {
 							alert("Please Enter Some Text.");
@@ -1502,7 +1367,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 			function replyHover() {
 				$('.com-like-react-reply').hover(function() {
-					var BASE_URL = 'http://localhost/1541012386/XDA/';
 					var mainReact = $(this).find('.com-react-bundle-wrap.reply');
 					$(mainReact).html(' <div class="react-bundle  align-middle" style="position:absolute;margin-top: -45px; margin-left: -40px; display:flex; background-color:white;padding: 0 2px;border-radius: 25px; box-shadow: 0px 0px 5px black; height:45px; width:270px; justify-content:space-around; transition: 0.3s;z-index:2"><div class="com-like-react-click  align-middle"><img class="reply-main-icon-css " src="' + BASE_URL + 'assets/image/react/like.png " alt=""></div><div class="com-love-react-click align-middle"><img class="reply-main-icon-css " src="' + BASE_URL + 'assets/image/react/love.png " alt=""></div><div class="com-haha-react-click  align-middle"><img class="reply-main-icon-css " src="' + BASE_URL + 'assets/image/react/haha.png " alt=""></div><div class="com-wow-react-click  align-middle"><img class="reply-main-icon-css " src="' + BASE_URL + 'assets/image/react/wow.png " alt=""></div><div class="com-sad-react-click  align-middle"><img class="reply-main-icon-css " src="' + BASE_URL + 'assets/image/react/sad.png " alt=""></div><div class="com-angry-react-click  align-middle"><img class="reply-main-icon-css " src="' + BASE_URL + 'assets/image/react/angry.png " alt=""></div></div>');
 				}, function() {
@@ -1597,7 +1461,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			})
 
 			function replyReactSubmit(typeR, postid, userid, commentID, commentparentid, com_nf_3) {
-				var profileid = <?php echo $profileId; ?>;
+				var profileid = p_id;
 				$.post('http://localhost/1541012386/XDA/core/ajax/replyReact.php', {
 					commentid: commentID,
 					reactType: typeR,
@@ -1611,7 +1475,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			}
 
 			function replyReactDelete(typeR, postid, userid, commentID, commentparentid, com_nf_3) {
-				var profileid = <?php echo $profileId; ?>;
+				var profileid = p_id;
 				$.post('http://localhost/1541012386/XDA/core/ajax/replyReact.php', {
 					delcommentid: commentID,
 					deleteReactType: typeR,
@@ -1680,7 +1544,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var commentid = $(this).data('commentid');
 				var replyid = $(this).data('replyid');
 				var replyContainer = $(this).parents('.new-reply');
-				var r = confirm("Do you want to erease your opinion?");
+				var r = confirm("Do you want to delete the comment?");
 				if (r == true) {
 					$.post('http://localhost/1541012386/XDA/core/ajax/editReply.php', {
 						deleteReply: postid,
@@ -1696,6 +1560,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 			//...........................Reply end ......................
 
+
 			//...........................Share ......................
 
 			$(document).on('click', '.share-action', function() {
@@ -1707,7 +1572,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var nf_1 = $(this).parents('.nf-4').siblings('.nf-1').html();
 				var nf_2 = $(this).parents('.nf-4').siblings('.nf-2').html();
 
-				$('.top-box-show').html('<div class="top-box profile-dialog-show" style="overflow: hidden;background-color: rgb(236, 236, 236);"> <div class="edit-post-header align-middle " style="justify-content: space-between; padding: 10px; height: 20px; background-color: lightgray;font-size: 14px; font-weight:600; "> <div class="edit-post-text">Share Post</div> <div class="edit-post-close" style="padding: 5px; color: gray; cursor:pointer;">x</div> </div> <div class="edit-post-value" style=""> <div class="status-med"> <div class="status-prof"> <div class="top-pic"><img src="' + profilePic + '" alt=""></div> </div> <div class="status-prof-textarea"> <textarea data-autoresize rows="5" columns="5" placeholder="Tell something about the post.." name="textStatus" class="shareText align-middle" style="padding-top: 10px;"></textarea> </div> </div> </div> <div class="news-feed-text" style=" display: flex; flex-direction: column; align-items: baseline; margin:5px;box-shadow:0 0 2px darkgray;overflow: hidden;"> ' + nf_1 + ' ' + nf_2 + ' </div> <div class="edit-post-submit" style="position: absolute;right:0; bottom: 0; display: flex; align-items: center; margin: 10px; z-index: 1;"> <div class="status-privacy-wrap"> <div class="status-privacy " style="background-color: #f5f6f8;"> <div class="privacy-icon align-middle"> <img src="assets/image/profile/publicIcon.JPG" alt=""> </div> <div class="privacy-text">Public</div> <div class="privacy-downarrow-icon align-middle"> <img src="assets/image/watchmore.png" alt=""> </div> </div> <div class="status-privacy-option"> </div> </div> <div class="post-Share" style="padding: 3px 15px; background-color: #4267bc;color: white; font-size: 14px; margin-left:5px;cursor:pointer;" data-postid="' + postid + '" data-userid="' + userid + '" data-profileid="' + profileid + '" >Quote</div> </div> <div style=" position: absolute; bottom: 0; height: 43px; width: 100%; text-align: center; background: lightgrey;box-shadow: -1px -1px 5px grey;"></div> </div>');
+				$('.top-box-show').html('<div class="top-box profile-dialog-show" style="overflow: hidden;background-color: rgb(236, 236, 236);"> <div class="edit-post-header align-middle " style="justify-content: space-between; padding: 10px; height: 20px; background-color: lightgray;font-size: 14px; font-weight:600; "> <div class="edit-post-text">Share Post</div> <div class="edit-post-close" style="padding: 5px; color: gray; cursor:pointer;">x</div> </div> <div class="edit-post-value" style=""> <div class="status-med"> <div class="status-prof"> <div class="top-pic"><img src="' + profilePic + '" alt=""></div> </div> <div class="status-prof-textarea"> <textarea data-autoresize rows="5" columns="5" placeholder="Tell something about the post.." name="textStatus" class="shareText align-middle" style="padding-top: 10px;"></textarea> </div> </div> </div> <div class="news-feed-text" style=" display: flex; flex-direction: column; align-items: baseline; margin:5px;box-shadow:0 0 2px darkgray;overflow: hidden;"> ' + nf_1 + ' ' + nf_2 + ' </div> <div class="edit-post-submit" style="position: absolute;right:0; bottom: 0; display: flex; align-items: center; margin: 10px; z-index: 1;"> <div class="status-privacy-wrap"> <div class="status-privacy " style="background-color: #f5f6f8;"> <div class="privacy-icon align-middle"> <img src="assets/image/profile/publicIcon.JPG" alt=""> </div> <div class="privacy-text">Public</div> <div class="privacy-downarrow-icon align-middle"> <img src="assets/image/watchmore.png" alt=""> </div> </div> <div class="status-privacy-option"> </div> </div> <div class="post-Share" style="padding: 3px 15px; background-color: #4267bc;color: white; font-size: 14px; margin-left:5px;cursor:pointer;" data-postid="' + postid + '" data-userid="' + userid + '" data-profileid="' + profileid + '" >Share</div> </div> <div style=" position: absolute; bottom: 0; height: 43px; width: 100%; text-align: center; background: lightgrey;box-shadow: -1px -1px 5px grey;"></div> </div>');
 
 				$('.nf-1-right-dott').hide();
 			})
@@ -1774,7 +1639,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var postid = $(this).data('postid');
 				var userid = $(this).data('userid');
 				var postContainer = $(this).parents('.profile-timeline');
-				var r = confirm("Do you want to remove this quote?");
+				var r = confirm("Do you want to delete the post?");
 
 				if (r == true) {
 					$.post('http://localhost/1541012386/XDA/core/ajax/sharedEditPost.php', {
@@ -1798,7 +1663,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 						searchText: searchText
 					}, function(data) {
 						if (data == '') {
-							$('.search-result').html('<p>No Hooman found</p>')
+							$('.search-result').html('<p>No user found</p>')
 						} else {
 							$('.search-result').html(data);
 						}
@@ -1811,7 +1676,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 			$(document).on('click', '.profile-add-friend', function() {
 				$(this).parents('.profile-action').find('.profile-follow-button').removeClass().addClass('profile-unfollow-button').html('<img src="assets/image/rightsignGray.JPG" alt=""><div class="profile-activity-button-text">Following</div>');
-				$(this).find('.edit-profile-button-text').text('Buddy Request Sent');
+				$(this).find('.edit-profile-button-text').text('Friend Request Sent');
 				$(this).removeClass().addClass('profile-friend-sent');
 				var userid = $(this).data('userid');
 				var profileid = $(this).data('profileid');
@@ -1834,7 +1699,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				var userid = $(this).data('userid');
 				var profileid = $(this).data('profileid');
 
-				$(this).parent().empty().html('<div class="con-req align-middle"><img src="assets/image/rightsignGray.JPG" alt="">Friend</div><div class="request-unfriend" data-userid="' + userid + '" data-profileid="' + profileid + '">Become Stranger?</div>');
+				$(this).parent().empty().html('<div class="con-req align-middle"><img src="assets/image/rightsignGray.JPG" alt="">Friend</div><div class="request-unfriend" data-userid="' + userid + '" data-profileid="' + profileid + '">Unfriend</div>');
 
 				$.post('http://localhost/1541012386/XDA/core/ajax/request.php', {
 					confirmRequest: profileid,
@@ -1860,7 +1725,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				}, function(data) {})
 			})
 			$(document).on('click', '.request-cancel', function() {
-				$(this).parents('.profile-friend-confirm').removeClass().addClass('profile-add-friend').html(' <img src="assets/image/friendRequestGray.JPG" alt=""><div class="edit-profile-button-text">Add Buddy</div>');
+				$(this).parents('.profile-friend-confirm').removeClass().addClass('profile-add-friend').html(' <img src="assets/image/friendRequestGray.JPG" alt=""><div class="edit-profile-button-text">Add Friend</div>');
 				var userid = $(this).data('userid');
 				var profileid = $(this).data('profileid');
 				$.post('http://localhost/1541012386/XDA/core/ajax/request.php', {
@@ -1870,7 +1735,7 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			})
 
 			$(document).on('click', '.request-unfriend', function() {
-				$(this).parents('.profile-friend-confirm').removeClass().addClass('profile-add-friend').html(' <img src="assets/image/friendRequestGray.JPG" alt=""><div class="edit-profile-button-text">Add Buddy</div>');
+				$(this).parents('.profile-friend-confirm').removeClass().addClass('profile-add-friend').html(' <img src="assets/image/friendRequestGray.JPG" alt=""><div class="edit-profile-button-text">Add Friend</div>');
 				var userid = $(this).data('userid');
 				var profileid = $(this).data('profileid');
 				$.post('http://localhost/1541012386/XDA/core/ajax/request.php', {
@@ -1939,145 +1804,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 			//...........................Settings end ......................
 
 
-			//...........................Notification Starts ......................
-
-			//			var 'u_id' = $('.u_p_id').data('uid');
-			//			var p_id = $('.u_p_id').data('pid');
-			var BASE_URL = "http://localhost/1541012386/XDA";
-
-			function notificationUpdate(userid) {
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					notificationUpdate: userid
-				}, function(data) {
-					if (data.trim() == '0') {
-						$('.notification-count').empty();
-						$('.notification-count').css({
-							"background-color": "transparent"
-						});
-
-					} else {
-						$('.notification-count').html(data);
-						$('.notification-count').css({
-							"background-color": "red"
-						});
-
-
-
-						//
-					}
-				})
-			}
-
-			function requestNotificationUpdate(userid) {
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					requestNotificationUpdate: userid
-				}, function(data) {
-					if (data.trim() == '0') {
-						$('.request-count').empty();
-						$('.request-count').css({
-							"background-color": "transparent"
-						});
-
-					} else {
-						$('.request-count').html(data);
-						$('.request-count').css({
-							"background-color": "red"
-						});
-
-					}
-				})
-			}
-
-			function messageNotificationUpdate(userid) {
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					messageNotificationUpdate: userid
-				}, function(data) {
-					if (data.trim() == '0') {
-						$('.message-count').empty();
-						$('.message-count').css({
-							"background-color": "transparent"
-						});
-
-					} else {
-						$('.message-count').html(data);
-						$('.message-count').css({
-							"background-color": "red"
-						});
-
-					}
-				})
-			}
-
-			$(document).on('click', '.top-notification', function() {
-				$('.notification-list-wrap').toggle();
-				var userid = '<?php echo $userid; ?>';
-
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					notify: userid
-				}, function(data) {
-
-				})
-			})
-
-			$(document).on('click', '.request-top-notification', function() {
-				$('.request-notification-list-wrap').toggle();
-				var userid = '<?php echo $userid; ?>';
-
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					requestNotify: userid
-				}, function(data) {
-
-				})
-			})
-			$(document).on('click', '.message-top-notification', function() {
-
-				var userid = '<?php echo $userid; ?>';
-
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					messageNotify: userid
-				}, function(data) {
-
-				})
-			})
-
-
-
-			var notificationInterval;
-			var userid = '<?php echo $userid; ?>';
-			notificationInterval = setInterval(function() {
-				notificationUpdate(userid);
-			}, 1000);
-			var requestNotificationInterval;
-			var userid = '<?php echo $userid; ?>';
-			requestNotificationInterval = setInterval(function() {
-				requestNotificationUpdate(userid);
-			}, 1000);
-
-			var messageNotificationInterval;
-			var userid = '<?php echo $userid; ?>';
-			messageNotificationInterval = setInterval(function() {
-				messageNotificationUpdate(userid);
-			}, 1000);
-
-
-
-			$(document).on('click', '.unread-notification', function() {
-				$(this).removeClass('unread-notification').addClass('read-notification');
-				var postid = $(this).data('postid');
-				var notificationId = $(this).data('notificationid');
-				var profileid = $(this).data('profileid');
-				var userid = '<?php echo $userid; ?>';
-				$.post('http://localhost/1541012386/XDA/core/ajax/notify.php', {
-					statusUpdate: userid,
-					profileid: profileid,
-					postid: postid,
-					notificationId: notificationId
-				}, function(data) {
-
-				})
-			})
-
-			//...........................Notification ends ......................
 
 
 
@@ -2087,8 +1813,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				container.push($('.add-cov-opt'));
 				container.push($('.profile-dialoge-show'));
 				container.push($('.notification-list-wrap'));
-				container.push($('.edit-post-close'));
-
 
 				$.each(container, function(key, value) {
 					if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
@@ -2105,7 +1829,6 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 				container.push($('.com-option-details-container'));
 				container.push($('.reply-option-details-container'));
 				container.push($('.shared-post-option-details-container'));
-				container.push($('.profile-dialog-show'));
 
 				$.each(container, function(key, value) {
 					if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
@@ -2134,12 +1857,14 @@ $messageNotification = $loadFromPost->messageNotificationCount($userid);
 
 				$.each(container, function(key, value) {
 					if (!$(value).is(e.target) && $(value).has(e.target).length === 0) {
-						$('.top-wrap').remove();
+						$('.top-box-show').empty();
 					}
 				})
 
 
 			})
+
+
 		})
 
 	</script>

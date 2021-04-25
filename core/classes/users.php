@@ -150,7 +150,32 @@ public function checkInput($variable){
         return $stmt->fetch(PDO::FETCH_OBJ);
     }
 
-    public function update($table, $user_id, $fields = array()){
+//    public function update($table, $user_id, $fields = array()){
+//        $columns = '';
+//        $i = 1;
+//
+//        foreach($fields as $name => $value){
+//            $columns .= "{$name} = :{$name}";
+////            coverPic = :coverPic, profilePic = :profilePic,
+//            if($i < count($fields)){
+//                $columns .= ', ';
+//            }
+//            $i++;
+//
+//
+//        }
+//         $sql = "UPDATE {$table} SET {$columns} WHERE userId = {$user_id}";
+////        UPDATE profile SET coverPic = :coverPic, profilePic = :profilePic WHERE userId = 10;
+//        if($stmt = $this->pdo->prepare($sql)){
+//            foreach($fields as $key => $value){
+//                $stmt->bindValue(':'.$key, $value);
+//            }
+//        }
+//        $stmt->execute();
+//
+//    }
+	
+	public function update($table, $user_id, $fields = array()){
         $columns = '';
         $i = 1;
 
@@ -174,7 +199,76 @@ public function checkInput($variable){
         $stmt->execute();
 
     }
+    
+    public function timeAgo($datetime){
+        $time = strtotime($datetime);
+        $current = time();
+        $seconds = $current-$time;
+        $minutes = round($seconds/60);
+        $hours = round($seconds/3600);
+        $months = round($seconds/2600640);
 
+        if($seconds <= 60){
+            if($seconds == 0){
+                return '0s';
+
+            }else{
+                return ''.$seconds.'s ago';
+            }
+
+        }else if($minutes <= 60){
+            return ''.$minutes.'m ago';
+        }else if($hours <= 24){
+            return ''.$hours.'h ago';
+        }else if($months <= 24){
+            return ''.date('M j', $time);
+        }else{
+            return ''.date('j M Y', $time);
+        }
+    }
+
+	public function timeAgoForCom($datetime){
+        $time = strtotime($datetime);
+        $current = time();
+        $seconds = $current-$time;
+        $minutes = round($seconds/60);
+        $hours = round($seconds/3600);
+        $months = round($seconds/2600640);
+
+        if($seconds <= 60){
+            if($seconds == 0){
+                return '0s';
+
+            }else{
+                return ''.$seconds.'s';
+            }
+
+        }else if($minutes <= 60){
+            return ''.$minutes.'m';
+        }else if($hours <= 24){
+            return ''.$hours.'h';
+        }else if($months <= 24){
+            return ''.date('M j', $time);
+        }else{
+            return ''.date('j M Y', $time);
+        }
+    }
+	
+	public function delete($table, $array){
+        $sql = "DELETE FROM `{$table}`";
+        $where = " WHERE ";
+        foreach($array as $name=>$value){
+            $sql .= "{$where} `{$name}` = :{$name}";
+            $where = " AND ";
+        }
+        if($stmt = $this->pdo->prepare($sql)){
+            foreach($array as $name=>$value){
+                $stmt->bindValue(':'.$name, $value);
+            }
+             $stmt->execute();
+        }
+
+    }
 }
 
 ?>
